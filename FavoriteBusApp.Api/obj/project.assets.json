@@ -33,16 +33,6 @@
             "related": ".pdb;.xml"
           }
         }
-      },
-      "FavoriteBusApp.PdfProcessor/1.0.0": {
-        "type": "project",
-        "framework": ".NETCoreApp,Version=v9.0",
-        "compile": {
-          "bin/placeholder/FavoriteBusApp.PdfProcessor.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/FavoriteBusApp.PdfProcessor.dll": {}
-        }
       }
     }
   },
@@ -77,16 +67,10 @@
         "microsoft.openapi.1.6.17.nupkg.sha512",
         "microsoft.openapi.nuspec"
       ]
-    },
-    "FavoriteBusApp.PdfProcessor/1.0.0": {
-      "type": "project",
-      "path": "../FavoriteBusApp.PdfProcessor/FavoriteBusApp.PdfProcessor.csproj",
-      "msbuildProject": "../FavoriteBusApp.PdfProcessor/FavoriteBusApp.PdfProcessor.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net9.0": [
-      "FavoriteBusApp.PdfProcessor >= 1.0.0",
       "Microsoft.AspNetCore.OpenApi >= 9.0.3"
     ]
   },
@@ -121,14 +105,11 @@
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
-          "projectReferences": {
-            "C:\\Work\\Learn\\FavoriteBusApp\\FavoriteBusApp.PdfProcessor\\FavoriteBusApp.PdfProcessor.csproj": {
-              "projectPath": "C:\\Work\\Learn\\FavoriteBusApp\\FavoriteBusApp.PdfProcessor\\FavoriteBusApp.PdfProcessor.csproj"
-            }
-          }
+          "projectReferences": {}
         }
       },
       "warningProperties": {
+        "allWarningsAsErrors": true,
         "warnAsError": [
           "NU1605"
         ]
