@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FavoriteBusApp.PdfProcessor\FavoriteBusApp.PdfProcessor.csproj" />
+    <ProjectReference Include="..\FavoriteBusApp.Data\FavoriteBusApp.Data.csproj" />
   </ItemGroup>
 
 </Project>

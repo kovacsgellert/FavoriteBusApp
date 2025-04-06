@@ -1,0 +1,221 @@
+:root {
+  /* Light theme variables */
+  --bg-color: #f9f9f9;
+  --text-color: #333;
+  --header-gradient-start: #2e7d32;
+  /* Changed from blue to green */
+  --header-gradient-end: #4caf50;
+  /* Changed from blue to green */
+  --container-bg: white;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --link-color: #4caf50;
+  /* Changed from blue to green */
+  --link-hover-color: #2e7d32;
+  /* Changed from blue to green */
+  --loading-color: #666;
+  --spinner-bg: #f3f3f3;
+  --spinner-color: #4caf50;
+  /* Changed from blue to green */
+  --error-color: #e74c3c;
+  --error-bg: #fde8e7;
+  --timetable-header-bg: #4caf50;
+  /* Changed from blue to green */
+  --timetable-header-text: white;
+  --time-item-bg: #f8f9fa;
+  --time-item-hover-bg: #e8f5e9;
+  /* Changed from light blue to light green */
+  --column-separator-color: #e0e0e0;
+  --toggle-bg-color: #4caf50;
+  /* Changed from blue to green */
+  --toggle-text-color: white;
+}
+
+[data-theme='dark'] {
+  /* Dark theme variables */
+  --bg-color: #1a1a1a;
+  --text-color: #f0f0f0;
+  --header-gradient-start: #1b5e20;
+  /* Changed from dark blue to dark green */
+  --header-gradient-end: #2e7d32;
+  /* Changed from dark blue to dark green */
+  --container-bg: #2c2c2c;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --link-color: #81c784;
+  /* Changed from blue to light green */
+  --link-hover-color: #a5d6a7;
+  /* Changed from light blue to lighter green */
+  --loading-color: #aaaaaa;
+  --spinner-bg: #333333;
+  --spinner-color: #4caf50;
+  /* Changed from blue to green */
+  --error-color: #e74c3c;
+  --error-bg: #3d2626;
+  --timetable-header-bg: #2e7d32;
+  /* Changed from dark blue to dark green */
+  --timetable-header-text: #f0f0f0;
+  --time-item-bg: #3a3a3a;
+  --time-item-hover-bg: #1b5e20;
+  /* Changed from bluish to dark green */
+  --column-separator-color: #444444;
+  --toggle-bg-color: #2e7d32;
+  /* Changed from dark blue to dark green */
+  --toggle-text-color: #f0f0f0;
+}
+
+.App {
+  text-align: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background: linear-gradient(135deg, var(--header-gradient-start), var(--header-gradient-end));
+  padding: 2rem;
+  color: white;
+  margin-bottom: 2.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px var(--shadow-color);
+  text-align: left;
+}
+
+.App-header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 600;
+}
+
+.App-header p {
+  margin: 0.5rem 0 0;
+  opacity: 0.9;
+  font-size: 1.1rem;
+}
+
+.App-link {
+  color: var(--link-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.App-link:hover {
+  color: var(--link-hover-color);
+  text-decoration: underline;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.App-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.timetables-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.loading {
+  padding: 2rem;
+  font-size: 1.2rem;
+  color: var(--loading-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading::after {
+  content: '';
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-left: 0.5rem;
+  border: 3px solid var(--spinner-bg);
+  border-top: 3px solid var(--spinner-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.error {
+  padding: 1.5rem;
+  font-size: 1rem;
+  color: var(--error-color);
+  background-color: var(--error-bg);
+  border-left: 4px solid var(--error-color);
+  border-radius: 5px;
+  margin-bottom: 1.5rem;
+  text-align: left;
+  box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .App {
+    padding: 10px;
+  }
+
+  .App-header h1 {
+    font-size: 2rem;
+  }
+
+  .App-header p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .App-header {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .App-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .error {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .loading {
+    padding: 1.5rem;
+    font-size: 1rem;
+  }
+}

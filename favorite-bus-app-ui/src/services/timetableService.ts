@@ -1,0 +1,24 @@
+import axios from 'axios';
+import { CtpWeeklyTimeTable, TIMETABLE_TYPES } from '../types/timetable';
+
+const API_BASE_URL = 'https://localhost:5001';
+
+export const fetchWeeklyTimetable = async (lineNumber: string): Promise<CtpWeeklyTimeTable> => {
+    try {
+        const response = await axios.get<CtpWeeklyTimeTable>(`${API_BASE_URL}/api/timetable/weekly/${lineNumber}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching timetable data:', error);
+        throw error;
+    }
+};
+
+export const getTimetableTypeToShow = (): string => {
+    const day = new Date().getDay();
+    if (day === 0)
+        return TIMETABLE_TYPES.SUNDAY;
+    if (day === 6)
+        return TIMETABLE_TYPES.SATURDAY;
+
+    return TIMETABLE_TYPES.WEEKDAY;
+}; 

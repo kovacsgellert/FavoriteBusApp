@@ -33,6 +33,16 @@
             "related": ".pdb;.xml"
           }
         }
+      },
+      "FavoriteBusApp.Data/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "compile": {
+          "bin/placeholder/FavoriteBusApp.Data.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/FavoriteBusApp.Data.dll": {}
+        }
       }
     }
   },
@@ -67,10 +77,16 @@
         "microsoft.openapi.1.6.17.nupkg.sha512",
         "microsoft.openapi.nuspec"
       ]
+    },
+    "FavoriteBusApp.Data/1.0.0": {
+      "type": "project",
+      "path": "../FavoriteBusApp.Data/FavoriteBusApp.Data.csproj",
+      "msbuildProject": "../FavoriteBusApp.Data/FavoriteBusApp.Data.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net9.0": [
+      "FavoriteBusApp.Data >= 1.0.0",
       "Microsoft.AspNetCore.OpenApi >= 9.0.3"
     ]
   },
@@ -105,7 +121,11 @@
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Work\\Learn\\FavoriteBusApp\\FavoriteBusApp.Data\\FavoriteBusApp.Data.csproj": {
+              "projectPath": "C:\\Work\\Learn\\FavoriteBusApp\\FavoriteBusApp.Data\\FavoriteBusApp.Data.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
