@@ -1,4 +1,4 @@
-namespace FavoriteBusApp.Data.Client;
+namespace FavoriteBusApp.Data;
 
 public class CtpCsvClient
 {
