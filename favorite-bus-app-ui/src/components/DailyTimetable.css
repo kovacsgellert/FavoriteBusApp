@@ -28,6 +28,8 @@
     margin-top: 1rem;
     border-radius: 8px;
     overflow: hidden;
+    display: flex;
+        flex-direction: column;
 }
 
 .timetable-header {
@@ -36,6 +38,17 @@
     font-weight: 600;
     text-align: center;
     padding: 1rem;
+    position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .timetable-body {
+        max-height: 400px;
+        overflow: hidden;
+        border: 1px solid var(--timetable-header-bg);
+        border-top: none;
+        border-radius: 0 0 8px 8px;
 }
 
 .timetable-content {
@@ -47,18 +60,36 @@
     width: 2px;
     background-color: var(--column-separator-color);
     margin: 0 10px;
+    flex-shrink: 0;
 }
 
 .timetable-column {
     flex: 1;
     padding: 0;
+    position: relative;
+    }
+    
+    .timetable-times-container {
+        max-height: 400px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        -ms-overflow-style: none;
+        padding: 0.5rem;
+    }
+    
+    .timetable-times-container::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .timetable-times-container::-webkit-scrollbar-thumb {
+        background-color: var(--timetable-header-bg);
+        border-radius: 6px;
 }
 
 .timetable-times {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    display: flex;
+        flex-direction: column;
     width: 100%;
-    gap: 0.5rem;
 }
 
 .time-item {
@@ -67,7 +98,7 @@
     padding: 0.6rem;
     text-align: center;
     font-family: 'Roboto Mono', monospace;
-    margin: 0.2rem;
+    margin: 0.3rem 0.5rem;
     transition: background-color 0.2s;
     color: var(--text-color);
 }
@@ -77,8 +108,12 @@
 }
 
 @media (max-width: 768px) {
-    .timetable-times {
-        grid-template-columns: repeat(3, 1fr);
+    .timetable-body {
+            max-height: 300px;
+        }
+    
+        .timetable-times-container {
+            max-height: 300px;
     }
 
     .timetable-container {
@@ -95,8 +130,12 @@
 }
 
 @media (max-width: 480px) {
-    .timetable-times {
-        grid-template-columns: repeat(2, 1fr);
+    .timetable-body {
+            max-height: 250px;
+        }
+    
+        .timetable-times-container {
+            max-height: 250px;
     }
 
     .timetable-header {
@@ -106,5 +145,6 @@
     .time-item {
         padding: 0.5rem;
         font-size: 0.9rem;
+        margin: 0.2rem 0.3rem;
     }
 }

@@ -22,26 +22,32 @@ const DailyTimetable: React.FC<DailyTimetableProps> = ({ timetable, title }) => 
                     </div>
                 </div>
 
-                <div className="timetable-content">
-                    <div className="timetable-column">
-                        <div className="timetable-times">
-                            {timetable.inStopTimes.map((time, index) => (
-                                <div key={index} className="time-item">
-                                    {time}
+                <div className="timetable-body">
+                    <div className="timetable-content">
+                        <div className="timetable-column">
+                            <div className="timetable-times-container">
+                                <div className="timetable-times">
+                                    {timetable.inStopTimes.map((time, index) => (
+                                        <div key={index} className="time-item">
+                                            {time}
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="column-separator"></div>
+                        <div className="column-separator"></div>
 
-                    <div className="timetable-column">
-                        <div className="timetable-times">
-                            {timetable.outStopTimes.map((time, index) => (
-                                <div key={index} className="time-item">
-                                    {time}
+                        <div className="timetable-column">
+                            <div className="timetable-times-container">
+                                <div className="timetable-times">
+                                    {timetable.outStopTimes.map((time, index) => (
+                                        <div key={index} className="time-item">
+                                            {time}
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
+                            </div>
                         </div>
                     </div>
                 </div>
