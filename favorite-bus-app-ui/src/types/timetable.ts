@@ -16,7 +16,7 @@ export interface CtpWeeklyTimeTable {
     sunday: CtpDailyTimetable;
 }
 
-export const TIMETABLE_TYPES = {
+export const DAY_TYPES = {
     WEEKDAY: 'WEEKDAY',
     SATURDAY: 'SATURDAY',
     SUNDAY: 'SUNDAY',

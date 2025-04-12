@@ -10,8 +10,4 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.3" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\FavoriteBusApp.Data\FavoriteBusApp.Data.csproj" />
-  </ItemGroup>
-
 </Project>

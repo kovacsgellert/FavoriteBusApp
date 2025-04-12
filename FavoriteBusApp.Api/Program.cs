@@ -1,5 +1,5 @@
-using FavoriteBusApp.Data;
-using FavoriteBusApp.Data.Models;
+using FavoriteBusApp.Api.Timetables;
+using FavoriteBusApp.Api.Timetables.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +20,7 @@ builder.Services.AddCors(options =>
 });
 
 // Register HttpClient for CtpCsvClient
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<CtpCsvClient>();
 builder.Services.AddScoped<CtpCsvClient>();
 builder.Services.AddScoped<CtpCsvParser>();
 
@@ -46,7 +46,7 @@ app.MapGet(
             try
             {
                 // Create the timetables directory if it doesn't exist
-                string timetablesDir = Path.Combine(Directory.GetCurrentDirectory(), "timetables");
+                string timetablesDir = Path.Combine(Directory.GetCurrentDirectory(), @"..\Assets");
                 //Directory.CreateDirectory(timetablesDir);
 
                 // Download the CSV files for bus 25
@@ -54,13 +54,13 @@ app.MapGet(
 
                 // Parse the downloaded CSV files
                 var weekdaysTimetable = csvParser.ParseCsvFile(
-                    Path.Combine(timetablesDir, "25_weekdays.csv")
+                    Path.Combine(timetablesDir, "timetable_25_weekdays.csv")
                 );
                 var saturdayTimetable = csvParser.ParseCsvFile(
-                    Path.Combine(timetablesDir, "25_saturday.csv")
+                    Path.Combine(timetablesDir, "timetable_25_saturday.csv")
                 );
                 var sundayTimetable = csvParser.ParseCsvFile(
-                    Path.Combine(timetablesDir, "25_sunday.csv")
+                    Path.Combine(timetablesDir, "timetable_25_sunday.csv")
                 );
 
                 // Create and return the weekly timetable

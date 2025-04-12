@@ -1,4 +1,4 @@
-namespace FavoriteBusApp.Data.Models;
+namespace FavoriteBusApp.Api.Timetables.Models;
 
 public class CtpDailyTimetable
 {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
-import { CtpWeeklyTimeTable, TIMETABLE_TYPES } from './types/timetable';
-import { fetchWeeklyTimetable, getTimetableTypeToShow } from './services/timetableService';
+import { CtpWeeklyTimeTable, DAY_TYPES as DAY_TYPES } from './types/timetable';
+import { fetchWeeklyTimetable, getDayTypeOfToday as getDayTypeOfToday } from './services/timetableService';
 import DailyTimetable from './components/DailyTimetable';
 import { ThemeProvider } from './contexts/ThemeContext';
 import ThemeToggle from './components/ThemeToggle';
@@ -29,7 +29,7 @@ function App() {
     loadTimetableData();
   }, []);
 
-  const tableTypeToShow = getTimetableTypeToShow();
+  const todayType = getDayTypeOfToday();
 
   return (
     <ThemeProvider>
@@ -40,7 +40,7 @@ function App() {
 
           {error && <div className="error">{error}</div>}
 
-          {weeklyTimetable && tableTypeToShow === TIMETABLE_TYPES.WEEKDAY && (
+          {weeklyTimetable && todayType === DAY_TYPES.WEEKDAY && (
             <div className="timetables-container">
               <DailyTimetable
                 timetable={weeklyTimetable.weekDays}
@@ -49,7 +49,7 @@ function App() {
             </div>
           )}
 
-          {weeklyTimetable && tableTypeToShow === TIMETABLE_TYPES.SATURDAY && (
+          {weeklyTimetable && todayType === DAY_TYPES.SATURDAY && (
             <div className="timetables-container">
               <DailyTimetable
                 timetable={weeklyTimetable.saturday}
@@ -58,7 +58,7 @@ function App() {
             </div>
           )}
 
-          {weeklyTimetable && tableTypeToShow === TIMETABLE_TYPES.SUNDAY && (
+          {weeklyTimetable && todayType === DAY_TYPES.SUNDAY && (
             <div className="timetables-container">
               <DailyTimetable
                 timetable={weeklyTimetable.sunday}

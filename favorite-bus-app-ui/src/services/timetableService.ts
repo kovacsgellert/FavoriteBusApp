@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CtpWeeklyTimeTable, TIMETABLE_TYPES } from '../types/timetable';
+import { CtpWeeklyTimeTable, DAY_TYPES } from '../types/timetable';
 
 const API_BASE_URL = 'https://localhost:5001';
 
@@ -13,12 +13,12 @@ export const fetchWeeklyTimetable = async (lineNumber: string): Promise<CtpWeekl
     }
 };
 
-export const getTimetableTypeToShow = (): string => {
+export const getDayTypeOfToday = (): string => {
     const day = new Date().getDay();
     if (day === 0)
-        return TIMETABLE_TYPES.SUNDAY;
+        return DAY_TYPES.SUNDAY;
     if (day === 6)
-        return TIMETABLE_TYPES.SATURDAY;
+        return DAY_TYPES.SATURDAY;
 
-    return TIMETABLE_TYPES.WEEKDAY;
+    return DAY_TYPES.WEEKDAY;
 }; 
