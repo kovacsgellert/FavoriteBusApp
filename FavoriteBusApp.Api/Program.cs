@@ -1,10 +1,9 @@
+using FavoriteBusApp.Api.Locations;
 using FavoriteBusApp.Api.Timetables;
 using FavoriteBusApp.Api.Timetables.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
@@ -19,14 +18,21 @@ builder.Services.AddCors(options =>
     );
 });
 
-// Register HttpClient for CtpCsvClient
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new TimeOnlyConverter());
+});
+
 builder.Services.AddHttpClient<CtpCsvClient>();
 builder.Services.AddScoped<CtpCsvClient>();
 builder.Services.AddScoped<CtpCsvParser>();
 
+builder.Services.Configure<TranzyOptions>(builder.Configuration.GetSection("Tranzy"));
+builder.Services.AddHttpClient<TranzyClient>();
+builder.Services.AddScoped<TranzyClient>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -37,40 +43,32 @@ else
     app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
-
 app.MapGet(
-        "/api/timetable/weekly/25",
-        (CtpCsvClient csvClient, CtpCsvParser csvParser) =>
+        "/api/timetables",
+        (CtpCsvParser csvParser) =>
         {
             try
             {
-                // Create the timetables directory if it doesn't exist
                 string timetablesDir = Path.Combine(Directory.GetCurrentDirectory(), @"..\Assets");
-                //Directory.CreateDirectory(timetablesDir);
 
-                // Download the CSV files for bus 25
-                //await csvClient.DownloadCsvFiles("25", timetablesDir);
-
-                // Parse the downloaded CSV files
                 var weekdaysTimetable = csvParser.ParseCsvFile(
+                    "25",
                     Path.Combine(timetablesDir, "timetable_25_weekdays.csv")
                 );
                 var saturdayTimetable = csvParser.ParseCsvFile(
+                    "25",
                     Path.Combine(timetablesDir, "timetable_25_saturday.csv")
                 );
                 var sundayTimetable = csvParser.ParseCsvFile(
+                    "25",
                     Path.Combine(timetablesDir, "timetable_25_sunday.csv")
                 );
 
-                // Create and return the weekly timetable
                 var weeklyTimetable = new CtpWeeklyTimeTable
                 {
                     RouteName = "25",
                     RouteLongName = weekdaysTimetable.RouteLongName,
-                    WeekDays = weekdaysTimetable,
-                    Saturday = saturdayTimetable,
-                    Sunday = sundayTimetable,
+                    DailyTimetables = [weekdaysTimetable, saturdayTimetable, sundayTimetable],
                 };
 
                 return Results.Ok(weeklyTimetable);
@@ -81,6 +79,23 @@ app.MapGet(
             }
         }
     )
-    .WithName("GetWeeklyTimetable");
+    .WithName("GetTimetables");
+
+app.MapGet(
+        "/api/vehicles",
+        async (TranzyClient tranzyClient) =>
+        {
+            try
+            {
+                var vehicles = await tranzyClient.GetVehicles(TranzyConstants.Bus25RouteId);
+                return Results.Ok(vehicles);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem($"Error retrieving vehicles: {ex.Message}");
+            }
+        }
+    )
+    .WithName("GetVehicles");
 
 app.Run();

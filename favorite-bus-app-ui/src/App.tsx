@@ -40,7 +40,7 @@ function App() {
 
           {error && <div className="error">{error}</div>}
 
-          {weeklyTimetable && todayType === DAY_TYPES.WEEKDAY && (
+          {weeklyTimetable && todayType === DAY_TYPES.Weekdays && (
             <div className="timetables-container">
               <DailyTimetable
                 timetable={weeklyTimetable.weekDays}
@@ -49,7 +49,7 @@ function App() {
             </div>
           )}
 
-          {weeklyTimetable && todayType === DAY_TYPES.SATURDAY && (
+          {weeklyTimetable && todayType === DAY_TYPES.Saturday && (
             <div className="timetables-container">
               <DailyTimetable
                 timetable={weeklyTimetable.saturday}
@@ -58,7 +58,7 @@ function App() {
             </div>
           )}
 
-          {weeklyTimetable && todayType === DAY_TYPES.SUNDAY && (
+          {weeklyTimetable && todayType === DAY_TYPES.Sunday && (
             <div className="timetables-container">
               <DailyTimetable
                 timetable={weeklyTimetable.sunday}

@@ -7,16 +7,15 @@ public class CtpCsvParser
 {
     private static readonly Dictionary<string, string> _csvDayTypeMap = new()
     {
-        { "Luni-Vineri", TimetableDayTypeConstants.Weekdays },
-        { "Sambata", TimetableDayTypeConstants.Saturday },
-        { "Duminica", TimetableDayTypeConstants.Sunday },
+        { "Luni-Vineri", DayTypeConstants.Weekdays },
+        { "Sambata", DayTypeConstants.Saturday },
+        { "Duminica", DayTypeConstants.Sunday },
     };
 
-    public CtpDailyTimetable ParseCsvFile(string filePath)
+    public CtpDailyTimetable ParseCsvFile(string routeName, string filePath)
     {
-        // Read all content from the CSV file
-        string csvContent = File.ReadAllText(filePath);
-        return ParseCsv(csvContent);
+        var csvContent = File.ReadAllText(filePath);
+        return ParseCsv(routeName, csvContent);
     }
 
     public CtpDailyTimetable ParseCsv(string routeName, string csvContent)
@@ -24,7 +23,7 @@ public class CtpCsvParser
         ArgumentException.ThrowIfNullOrWhiteSpace(routeName, nameof(routeName));
         ArgumentException.ThrowIfNullOrWhiteSpace(csvContent, nameof(csvContent));
 
-        var lines = csvContent.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        var lines = csvContent.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
 
         if (lines.Length < 5)
             throw new ArgumentException(
@@ -33,8 +32,9 @@ public class CtpCsvParser
 
         var timetable = new CtpDailyTimetable
         {
-            RouteName = ParseHeaderLine(lines[0]),
-            RouteLongName = ParseHeaderLine(lines[1]),
+            RouteName = routeName,
+            RouteLongName = ParseHeaderLine(lines[0]),
+            DayType = _csvDayTypeMap[ParseHeaderLine(lines[1])],
             ValidFromDate = ParseDate(ParseHeaderLine(lines[2])),
             InStopName = ParseHeaderLine(lines[3]),
             OutStopName = ParseHeaderLine(lines[4]),
@@ -75,6 +75,8 @@ public class CtpCsvParser
             return date;
         }
 
-        return DateOnly.FromDateTime(DateTime.MinValue);
+        throw new ArgumentException(
+            $"Invalid date format: {dateStr}. Expected format is DD.MM.YYYY."
+        );
     }
 }

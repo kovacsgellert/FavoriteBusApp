@@ -17,8 +17,8 @@ export interface CtpWeeklyTimeTable {
 }
 
 export const DAY_TYPES = {
-    WEEKDAY: 'WEEKDAY',
-    SATURDAY: 'SATURDAY',
-    SUNDAY: 'SUNDAY',
+    Weekdays: 'Weekdays',
+    Saturday: 'Saturday',
+    Sunday: 'Sunday',
 };
 

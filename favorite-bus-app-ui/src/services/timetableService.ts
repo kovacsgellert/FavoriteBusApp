@@ -16,9 +16,9 @@ export const fetchWeeklyTimetable = async (lineNumber: string): Promise<CtpWeekl
 export const getDayTypeOfToday = (): string => {
     const day = new Date().getDay();
     if (day === 0)
-        return DAY_TYPES.SUNDAY;
+        return DAY_TYPES.Sunday;
     if (day === 6)
-        return DAY_TYPES.SATURDAY;
+        return DAY_TYPES.Saturday;
 
-    return DAY_TYPES.WEEKDAY;
+    return DAY_TYPES.Weekdays;
 }; 

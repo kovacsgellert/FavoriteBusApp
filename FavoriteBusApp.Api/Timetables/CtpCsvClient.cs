@@ -12,9 +12,9 @@ public class CtpCsvClient
 
     private static readonly Dictionary<string, string> _urlDayTypeMap = new()
     {
-        { TimetableDayTypeConstants.Weekdays, "lv" },
-        { TimetableDayTypeConstants.Saturday, "s" },
-        { TimetableDayTypeConstants.Sunday, "d" },
+        { DayTypeConstants.Weekdays, "lv" },
+        { DayTypeConstants.Saturday, "s" },
+        { DayTypeConstants.Sunday, "d" },
     };
 
     public CtpCsvClient(HttpClient httpClient, CtpCsvParser csvParser)
