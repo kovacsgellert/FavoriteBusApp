@@ -49,7 +49,10 @@ app.MapGet(
         {
             try
             {
-                string timetablesDir = Path.Combine(Directory.GetCurrentDirectory(), @"..\Assets");
+                string timetablesDir = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    @"..\..\assets"
+                );
 
                 var weekdaysTimetable = csvParser.ParseCsvFile(
                     "25",
