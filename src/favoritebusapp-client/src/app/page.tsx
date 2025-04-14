@@ -31,6 +31,18 @@ export default function HomePage() {
     }
   };
 
+  const getTodaysType = () => {
+    const today = new Date().getDay();
+    switch (today) {
+      case 0:
+        return "sunday";
+      case 6:
+        return "saturday";
+      default:
+        return "weekdays";
+    }
+  };
+
   useEffect(() => {
     fetchWeeklyTimetable();
   }, []);
@@ -47,15 +59,22 @@ export default function HomePage() {
     return <div>No data available</div>;
   }
 
-  let dailyTimetable = weeklyTimetable.dailyTimetables[0]!;
+  const todaysType = getTodaysType();
+  const todaysTimetable = weeklyTimetable.dailyTimetables.find(
+    (timetable) => timetable.dayType === todaysType,
+  )!;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#1a6347] to-[#15162c] text-white">
-      <div className="container mx-auto flex flex-row gap-4 px-4">
-        <div className="w-1/4">
+    <main className="flex h-screen flex-col overflow-hidden bg-gradient-to-b from-[#1a6347] to-[#15162c] text-white">
+      <h1 className="py-3 text-center text-4xl font-bold">
+        {todaysType.toUpperCase()} timetables for Line{" "}
+        {todaysTimetable.routeName} ({todaysTimetable.routeLongName})
+      </h1>
+      <div className="container mx-auto flex flex-grow flex-row gap-4 overflow-hidden px-4">
+        <div className="w-1/4 overflow-auto">
           <Timetable
-            header={dailyTimetable.inStopName}
-            values={dailyTimetable.inStopTimes}
+            header={todaysTimetable.inStopName}
+            values={todaysTimetable.inStopTimes}
           />
         </div>
         <div className="w-1/4">
@@ -85,30 +104,3 @@ export default function HomePage() {
   );
 }
 
-function Timetable({ header, values }: TimetableProps) {
-  return (
-    <div className="h-80vh overflow-y-auto shadow-md sm:rounded-lg">
-      <table className="w-full text-center text-sm text-gray-500 dark:text-gray-400">
-        <thead className="sticky top-0 bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
-          <tr>
-            <th scope="col" className="px-6 py-3">
-              {header}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {values.map((value, index) => (
-            <tr className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-              <td className="px-6 py-4">{value}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-type TimetableProps = {
-  header: string;
-  values: string[];
-};
