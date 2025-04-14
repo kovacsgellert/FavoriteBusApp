@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { CtpWeeklyTimetable } from "./types";
+import type { CtpWeeklyTimetable } from "./timetable.model";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import Timetable from "./timetable";
 
 export default function HomePage() {
   const [weeklyTimetable, setWeeklyTimetable] =
@@ -67,23 +68,25 @@ export default function HomePage() {
   return (
     <main className="flex h-screen flex-col overflow-hidden bg-gradient-to-b from-[#1a6347] to-[#15162c] text-white">
       <h1 className="py-3 text-center text-4xl font-bold">
-        {todaysType.toUpperCase()} timetables for Line{" "}
+        {todaysType.toUpperCase()} timetables for line{" "}
         {todaysTimetable.routeName} ({todaysTimetable.routeLongName})
       </h1>
-      <div className="container mx-auto flex flex-grow flex-row gap-4 overflow-hidden px-4">
-        <div className="w-1/4 overflow-auto">
-          <Timetable
-            header={todaysTimetable.inStopName}
-            values={todaysTimetable.inStopTimes}
-          />
+      <div className="container mx-auto flex flex-grow flex-col gap-4 overflow-hidden px-4 md:flex-row">
+        <div className="flex h-1/2 flex-row gap-4 md:h-auto md:w-1/2">
+          <div className="w-1/2 overflow-auto">
+            <Timetable
+              header={todaysTimetable.inStopName}
+              values={todaysTimetable.inStopTimes}
+            />
+          </div>
+          <div className="w-1/2 overflow-auto">
+            <Timetable
+              header={todaysTimetable.outStopName}
+              values={todaysTimetable.outStopTimes}
+            />
+          </div>
         </div>
-        <div className="w-1/4">
-          <Timetable
-            header={dailyTimetable.outStopName}
-            values={dailyTimetable.outStopTimes}
-          />
-        </div>
-        <div className="h-80vh w-1/2">
+        <div className="h-1/2 md:h-auto md:w-1/2">
           <MapContainer
             center={[46.7712, 23.6236]}
             zoom={13}
