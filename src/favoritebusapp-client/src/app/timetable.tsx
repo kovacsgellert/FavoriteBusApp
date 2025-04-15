@@ -11,7 +11,10 @@ export default function Timetable({ header, values }: TimetableProps) {
         </thead>
         <tbody>
           {values.map((value, index) => (
-            <tr className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+            <tr
+              key={index}
+              className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+            >
               <td className="px-6 py-4">{value}</td>
             </tr>
           ))}

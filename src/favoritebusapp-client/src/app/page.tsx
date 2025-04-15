@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { CtpWeeklyTimetable } from "./timetable.model";
+import type { CtpWeeklyTimetable, TranzyVehicle } from "./models";
 import Timetable from "./timetable";
 import dynamic from "next/dynamic";
 
@@ -11,12 +11,19 @@ const DynamicMap = dynamic(() => import("./map"), { ssr: false });
 export default function HomePage() {
   const [weeklyTimetable, setWeeklyTimetable] =
     useState<CtpWeeklyTimetable | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [weeklyTimetableLoading, setWeeklyTimetableLoading] = useState(true);
+  const [weeklyTimetableError, setWeeklyTimetableError] = useState<
+    string | null
+  >(null);
+
+  const [vehicles, setVehicles] = useState<TranzyVehicle[]>([]);
+  const [vehiclesLoading, setVehiclesLoading] = useState(true);
+  const [vehiclesError, setVehiclesError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchWeeklyTimetable = async () => {
-    setLoading(true);
-    setError(null);
+    setWeeklyTimetableLoading(true);
+    setWeeklyTimetableError(null);
     try {
       const response = await fetch("https://localhost:5001/api/timetables");
       if (!response.ok) {
@@ -27,11 +34,31 @@ export default function HomePage() {
       const data = await response.json();
       setWeeklyTimetable(data);
     } catch (err: unknown) {
-      setError(
+      setWeeklyTimetableError(
         err instanceof Error ? err.message : "An unknown error occurred",
       );
     } finally {
-      setLoading(false);
+      setWeeklyTimetableLoading(false);
+    }
+  };
+
+  const fetchVehicles = async () => {
+    setVehiclesLoading(true);
+    setVehiclesError(null);
+    try {
+      const response = await fetch("https://localhost:5001/api/vehicles");
+      if (!response.ok) {
+        throw new Error("Failed to fetch vehicles. Status: " + response.status);
+      }
+      const data = await response.json();
+      setVehicles(data);
+      setLastUpdated(new Date()); // Set last updated timestamp
+    } catch (err: unknown) {
+      setVehiclesError(
+        err instanceof Error ? err.message : "An unknown error occurred",
+      );
+    } finally {
+      setVehiclesLoading(false);
     }
   };
 
@@ -48,15 +75,27 @@ export default function HomePage() {
   };
 
   useEffect(() => {
+    // Initial data fetch
     fetchWeeklyTimetable();
+    fetchVehicles();
+
+    // Set up interval for vehicles refresh every 30 seconds
+    const vehiclesRefreshInterval = setInterval(() => {
+      fetchVehicles();
+    }, 30000); // 30000 milliseconds = 30 seconds
+
+    // Clean up interval on component unmount
+    return () => {
+      clearInterval(vehiclesRefreshInterval);
+    };
   }, []);
 
-  if (loading) {
+  if (weeklyTimetableLoading) {
     return <div>Loading...</div>;
   }
 
-  if (error) {
-    return <div>Error: {error}</div>;
+  if (weeklyTimetableError) {
+    return <div>Error: {weeklyTimetableError}</div>;
   }
 
   if (!weeklyTimetable || weeklyTimetable.dailyTimetables.length === 0) {
@@ -75,7 +114,7 @@ export default function HomePage() {
         {todaysTimetable.routeLongName})
       </h1>
       <div className="container mx-auto flex flex-grow flex-col gap-4 overflow-hidden px-4 md:flex-row">
-        <div className="flex h-1/2 flex-row gap-4 md:h-auto md:w-1/2">
+        <div className="flex h-1/2 flex-row gap-4 md:h-auto md:w-1/3">
           <div className="w-1/2 overflow-auto">
             <Timetable
               header={todaysTimetable.inStopName}
@@ -89,12 +128,17 @@ export default function HomePage() {
             />
           </div>
         </div>
-        <div className="h-1/2 md:h-auto md:w-1/2">
-          <DynamicMap />
+        <div className="h-1/2 md:h-auto md:w-2/3">
+          <DynamicMap vehicles={vehicles} loading={vehiclesLoading} />
         </div>
       </div>
       <footer className="mt-auto py-2 text-center text-sm text-gray-300">
         Gellért Kovács, 2025
+        {lastUpdated && (
+          <span className="ml-4">
+            Vehicles last updated: {lastUpdated.toLocaleTimeString()}
+          </span>
+        )}
       </footer>
     </main>
   );

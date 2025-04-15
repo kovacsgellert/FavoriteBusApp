@@ -14,3 +14,17 @@ export type DailyTimetable = {
   inStopTimes: string[];
   outStopTimes: string[];
 };
+
+export type TranzyVehicle = {
+  id: number;
+  label: string;
+  latitude: number;
+  longitude: number;
+  timestamp: Date;
+  speed: number;
+  routeId: number;
+  tripId: string;
+  vehicleType: number;
+  bikeAccessible: string;
+  wheelchairAccessible: string;
+};
