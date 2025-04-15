@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import type { CtpWeeklyTimetable } from "./timetable.model";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import Timetable from "./timetable";
+import dynamic from "next/dynamic";
+
+// leaflet requires dynamic import to avoid SSR issues
+const DynamicMap = dynamic(() => import("./map"), { ssr: false });
 
 export default function HomePage() {
   const [weeklyTimetable, setWeeklyTimetable] =
@@ -67,9 +70,9 @@ export default function HomePage() {
 
   return (
     <main className="flex h-screen flex-col overflow-hidden bg-gradient-to-b from-[#1a6347] to-[#15162c] text-white">
-      <h1 className="py-3 text-center text-4xl font-bold">
-        {todaysType.toUpperCase()} timetables for line{" "}
-        {todaysTimetable.routeName} ({todaysTimetable.routeLongName})
+      <h1 className="py-3 text-center text-xl font-bold md:text-3xl">
+        {todaysType.toUpperCase()} - {todaysTimetable.routeName} (
+        {todaysTimetable.routeLongName})
       </h1>
       <div className="container mx-auto flex flex-grow flex-col gap-4 overflow-hidden px-4 md:flex-row">
         <div className="flex h-1/2 flex-row gap-4 md:h-auto md:w-1/2">
@@ -87,23 +90,12 @@ export default function HomePage() {
           </div>
         </div>
         <div className="h-1/2 md:h-auto md:w-1/2">
-          <MapContainer
-            center={[46.7712, 23.6236]}
-            zoom={13}
-            scrollWheelZoom={true}
-            style={{ height: "100%", width: "100%" }}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <Marker position={[46.7712, 23.6236]}>
-              <Popup>Cluj-Napoca City Center</Popup>
-            </Marker>
-          </MapContainer>
+          <DynamicMap />
         </div>
       </div>
+      <footer className="mt-auto py-2 text-center text-sm text-gray-300">
+        Gellért Kovács, 2025
+      </footer>
     </main>
   );
 }
-
