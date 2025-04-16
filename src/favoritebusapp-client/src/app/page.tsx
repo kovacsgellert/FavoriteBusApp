@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { CtpWeeklyTimetable, TranzyVehicle } from "./models";
 import Timetable from "./timetable";
 import dynamic from "next/dynamic";
+import { API_URL } from "./constants";
 
 // leaflet requires dynamic import to avoid SSR issues
 const DynamicMap = dynamic(() => import("./map"), { ssr: false });
@@ -25,7 +26,7 @@ export default function HomePage() {
     setWeeklyTimetableLoading(true);
     setWeeklyTimetableError(null);
     try {
-      const response = await fetch("https://localhost:5001/api/timetables");
+      const response = await fetch(`${API_URL}/timetables`);
       if (!response.ok) {
         throw new Error(
           "Failed to fetch weekly timetable. Status: " + response.status,
@@ -46,7 +47,7 @@ export default function HomePage() {
     setVehiclesLoading(true);
     setVehiclesError(null);
     try {
-      const response = await fetch("https://localhost:5001/api/vehicles");
+      const response = await fetch(`${API_URL}/vehicles`);
       if (!response.ok) {
         throw new Error("Failed to fetch vehicles. Status: " + response.status);
       }

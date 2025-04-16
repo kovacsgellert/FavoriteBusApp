@@ -4,19 +4,21 @@ using FavoriteBusApp.Api.Timetables.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(
-        "AllowAllOrigins",
-        builder =>
-        {
-            builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-        }
-    );
-});
+// builder.Services.AddCors(options =>
+// {
+//     options.AddPolicy(
+//         "AllowAllOrigins",
+//         builder =>
+//         {
+//             builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+//         }
+//     );
+// });
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
@@ -36,7 +38,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseCors("AllowAllOrigins");
+    // app.UseCors("AllowAllOrigins");
 }
 else
 {

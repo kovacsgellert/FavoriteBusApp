@@ -5,6 +5,16 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+    // use Next.js as proxy for api calls to solve CORS issues
+    async rewrites() {
+        return [
+            {
+                source: "/api/:path*",
+                destination: `${process.env.services__api__http__0}/api/:path*`
+            },
+        ]
+    }
+};
 
 export default config;
