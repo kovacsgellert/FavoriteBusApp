@@ -129,7 +129,7 @@ export default function HomePage() {
           </div>
         </div>
         <div className="h-1/2 md:h-auto md:w-2/3">
-          <DynamicMap vehicles={vehicles} loading={vehiclesLoading} />
+          <DynamicMap vehicles={vehicles} />
         </div>
       </div>
       <footer className="mt-auto py-2 text-center text-sm text-gray-300">

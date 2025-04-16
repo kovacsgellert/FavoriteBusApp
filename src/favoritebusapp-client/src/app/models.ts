@@ -1,10 +1,10 @@
 export type CtpWeeklyTimetable = {
   routeName: string;
   routeLongName: string;
-  dailyTimetables: DailyTimetable[];
+  dailyTimetables: CtpDailyTimetable[];
 };
 
-export type DailyTimetable = {
+export type CtpDailyTimetable = {
   routeName: string;
   routeLongName: string;
   dayType: string;
