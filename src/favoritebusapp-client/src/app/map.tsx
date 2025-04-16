@@ -21,10 +21,9 @@ const purpleBusIcon = new L.Icon({
 });
 interface MapProps {
   vehicles: TranzyVehicle[];
-  loading: boolean;
 }
 
-export default function Map({ vehicles, loading }: MapProps) {
+export default function Map({ vehicles }: MapProps) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -58,8 +57,7 @@ export default function Map({ vehicles, loading }: MapProps) {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {!loading &&
-        vehicles &&
+      {vehicles &&
         vehicles.map((vehicle) => (
           <Marker
             key={vehicle.id}
