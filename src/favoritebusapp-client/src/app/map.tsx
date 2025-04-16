@@ -5,11 +5,20 @@ import { useEffect, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import type { TranzyVehicle } from "./models";
 
-const busIcon = new L.Icon({
-  iconUrl: "/bus-icon.png",
+const greenBusIcon = new L.Icon({
+  iconUrl: "/bus-green.png",
   iconSize: [32, 32],
 });
 
+const orangeBusIcon = new L.Icon({
+  iconUrl: "/bus-orange.png",
+  iconSize: [32, 32],
+});
+
+const purpleBusIcon = new L.Icon({
+  iconUrl: "/bus-purple.png",
+  iconSize: [32, 32],
+});
 interface MapProps {
   vehicles: TranzyVehicle[];
   loading: boolean;
@@ -23,9 +32,20 @@ export default function Map({ vehicles, loading }: MapProps) {
     return () => setIsMounted(false);
   }, []);
 
-  if (!isMounted || loading) {
+  if (!isMounted) {
     return <div className="h-full w-full animate-pulse bg-gray-800"></div>;
   }
+
+  const getIcon = (vehicle: TranzyVehicle) => {
+    switch (vehicle.trip_id) {
+      case "14_0": // going to Snagov Nord
+        return purpleBusIcon;
+      case "14_1": // going to Disp. Calbucet
+        return orangeBusIcon;
+      default:
+        return greenBusIcon;
+    }
+  };
 
   return (
     <MapContainer
@@ -44,11 +64,11 @@ export default function Map({ vehicles, loading }: MapProps) {
           <Marker
             key={vehicle.id}
             position={[vehicle.latitude, vehicle.longitude]}
-            icon={busIcon}
+            icon={getIcon(vehicle)}
           >
             <Popup>
               Label: {vehicle.label} <br />
-              Speed: {vehicle.speed} km/h
+              Speed: {vehicle.speed} km/h <br />
             </Popup>
           </Marker>
         ))}

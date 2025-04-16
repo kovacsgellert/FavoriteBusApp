@@ -1,6 +1,6 @@
 export default function Timetable({ header, values }: TimetableProps) {
   return (
-    <div className="h-80vh overflow-y-auto shadow-md sm:rounded-lg">
+    <div className="overflow-y-auto shadow-md sm:rounded-lg">
       <table className="w-full text-center text-sm text-gray-500 dark:text-gray-400">
         <thead className="sticky top-0 bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
           <tr>

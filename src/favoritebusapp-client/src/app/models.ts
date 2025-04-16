@@ -22,9 +22,9 @@ export type TranzyVehicle = {
   longitude: number;
   timestamp: Date;
   speed: number;
-  routeId: number;
-  tripId: string;
-  vehicleType: number;
-  bikeAccessible: string;
-  wheelchairAccessible: string;
+  route_id: number;
+  trip_id: string;
+  vehicle_type: number;
+  bike_accessible: string;
+  wheelchair_accessible: string;
 };

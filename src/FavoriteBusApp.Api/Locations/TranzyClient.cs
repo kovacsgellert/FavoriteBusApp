@@ -15,7 +15,7 @@ public class TranzyClient
         _options = options;
     }
 
-    public async Task<TranzyVehicle[]> GetVehicles(int routeId)
+    public async Task<TranzyVehicle[]> GetVehicles(int routeId, int noOlderThanMinutes = 5)
     {
         var url = $"{TranzyConstants.TranzyBaseUrl}/vehicles";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -29,6 +29,12 @@ public class TranzyClient
 
         var vehicles = JsonSerializer.Deserialize<TranzyVehicle[]>(content) ?? [];
 
-        return [.. vehicles.Where(v => v.RouteId == routeId)];
+        return
+        [
+            .. vehicles.Where(v =>
+                v.RouteId == routeId
+                && v.Timestamp > DateTime.UtcNow.AddMinutes(-noOlderThanMinutes)
+            ),
+        ];
     }
 }
