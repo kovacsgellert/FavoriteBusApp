@@ -7,17 +7,17 @@ import type { TranzyVehicle } from "./models";
 
 const greenBusIcon = new L.Icon({
   iconUrl: "/bus-green.png",
-  iconSize: [32, 32],
+  iconSize: [24, 24],
 });
 
 const orangeBusIcon = new L.Icon({
   iconUrl: "/bus-orange.png",
-  iconSize: [32, 32],
+  iconSize: [24, 24],
 });
 
 const purpleBusIcon = new L.Icon({
   iconUrl: "/bus-purple.png",
-  iconSize: [32, 32],
+  iconSize: [24, 24],
 });
 interface MapProps {
   vehicles: TranzyVehicle[];
