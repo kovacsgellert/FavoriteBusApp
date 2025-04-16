@@ -31,10 +31,6 @@ export default function Map({ vehicles }: MapProps) {
     return () => setIsMounted(false);
   }, []);
 
-  if (!isMounted) {
-    return <div className="h-full w-full animate-pulse bg-gray-800"></div>;
-  }
-
   const getIcon = (vehicle: TranzyVehicle) => {
     switch (vehicle.trip_id) {
       case "14_0": // going to Snagov Nord
@@ -45,6 +41,10 @@ export default function Map({ vehicles }: MapProps) {
         return greenBusIcon;
     }
   };
+
+  if (!isMounted) {
+    return <div className="h-full w-full animate-pulse bg-gray-800"></div>;
+  }
 
   return (
     <MapContainer
