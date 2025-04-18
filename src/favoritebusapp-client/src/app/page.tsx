@@ -20,7 +20,7 @@ export default function HomePage() {
   const [vehicles, setVehicles] = useState<TranzyVehicle[]>([]);
   const [vehiclesLoading, setVehiclesLoading] = useState(true);
   const [vehiclesError, setVehiclesError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   const fetchWeeklyTimetable = async () => {
     setWeeklyTimetableLoading(true);
@@ -75,6 +75,12 @@ export default function HomePage() {
     }
   };
 
+  const formatTime = (date: Date): string => {
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
+  };
+
   useEffect(() => {
     // Initial data fetch
     fetchWeeklyTimetable();
@@ -83,7 +89,7 @@ export default function HomePage() {
     // Set up interval for vehicles refresh every 30 seconds
     const vehiclesRefreshInterval = setInterval(() => {
       fetchVehicles();
-    }, 30000); // 30000 milliseconds = 30 seconds
+    }, 30000);
 
     // Clean up interval on component unmount
     return () => {
@@ -120,12 +126,14 @@ export default function HomePage() {
             <Timetable
               header={todaysTimetable.inStopName}
               values={todaysTimetable.inStopTimes}
+              timeNow={lastUpdated ? formatTime(lastUpdated) : ""}
             />
           </div>
           <div className="w-1/2 overflow-auto">
             <Timetable
               header={todaysTimetable.outStopName}
               values={todaysTimetable.outStopTimes}
+              timeNow={lastUpdated ? formatTime(lastUpdated) : ""}
             />
           </div>
         </div>

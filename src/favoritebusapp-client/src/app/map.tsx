@@ -19,6 +19,17 @@ const purpleBusIcon = new L.Icon({
   iconUrl: "/bus-purple.png",
   iconSize: [24, 24],
 });
+
+const leftBusIcon = new L.Icon({
+  iconUrl: "/bus-left-64.png",
+  iconSize: [48, 48],
+});
+
+const rightBusIcon = new L.Icon({
+  iconUrl: "/bus-right-64.png",
+  iconSize: [48, 48],
+});
+
 interface MapProps {
   vehicles: TranzyVehicle[];
 }
@@ -34,11 +45,11 @@ export default function Map({ vehicles }: MapProps) {
   const getIcon = (vehicle: TranzyVehicle) => {
     switch (vehicle.trip_id) {
       case "14_0": // going to Snagov Nord
-        return purpleBusIcon;
+        return rightBusIcon;
       case "14_1": // going to Disp. Calbucet
-        return orangeBusIcon;
+        return leftBusIcon;
       default:
-        return greenBusIcon;
+        return orangeBusIcon;
     }
   };
 
