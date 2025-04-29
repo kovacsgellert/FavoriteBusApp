@@ -18,9 +18,7 @@ export default function HomePage() {
   >(null);
 
   const [vehicles, setVehicles] = useState<TranzyVehicle[]>([]);
-  const [vehiclesLoading, setVehiclesLoading] = useState(true);
-  const [vehiclesError, setVehiclesError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
 
   const fetchWeeklyTimetable = async () => {
     setWeeklyTimetableLoading(true);
@@ -32,11 +30,13 @@ export default function HomePage() {
           "Failed to fetch weekly timetable. Status: " + response.status,
         );
       }
-      const data = await response.json();
+      const data = (await response.json()) as CtpWeeklyTimetable;
       setWeeklyTimetable(data);
     } catch (err: unknown) {
       setWeeklyTimetableError(
-        err instanceof Error ? err.message : "An unknown error occurred",
+        err instanceof Error
+          ? err.message
+          : "An unknown error occurred while fetching timetable",
       );
     } finally {
       setWeeklyTimetableLoading(false);
@@ -44,22 +44,20 @@ export default function HomePage() {
   };
 
   const fetchVehicles = async () => {
-    setVehiclesLoading(true);
-    setVehiclesError(null);
     try {
       const response = await fetch(`${API_URL}/vehicles`);
       if (!response.ok) {
         throw new Error("Failed to fetch vehicles. Status: " + response.status);
       }
-      const data = await response.json();
+      const data = (await response.json()) as TranzyVehicle[];
       setVehicles(data);
-      setLastUpdated(new Date()); // Set last updated timestamp
+      setLastRefreshed(new Date()); // Set last updated timestamp
     } catch (err: unknown) {
-      setVehiclesError(
-        err instanceof Error ? err.message : "An unknown error occurred",
+      console.log(
+        err instanceof Error
+          ? err.message
+          : "An unknown error occurred while fetching vehicles",
       );
-    } finally {
-      setVehiclesLoading(false);
     }
   };
 
@@ -75,20 +73,19 @@ export default function HomePage() {
     }
   };
 
-  const formatTime = (date: Date): string => {
+  const getTimeNow = (date: Date): string => {
     const hours = date.getHours().toString().padStart(2, "0");
     const minutes = date.getMinutes().toString().padStart(2, "0");
     return `${hours}:${minutes}`;
   };
 
   useEffect(() => {
-    // Initial data fetch
-    fetchWeeklyTimetable();
-    fetchVehicles();
+    void fetchWeeklyTimetable();
+    void fetchVehicles();
 
-    // Set up interval for vehicles refresh every 30 seconds
+    // Set up interval to refresh vehicles every 30 seconds
     const vehiclesRefreshInterval = setInterval(() => {
-      fetchVehicles();
+      void fetchVehicles();
     }, 30000);
 
     // Clean up interval on component unmount
@@ -98,7 +95,11 @@ export default function HomePage() {
   }, []);
 
   if (weeklyTimetableLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-16 w-16 animate-spin rounded-full border-4 border-t-4 border-gray-200"></div>
+      </div>
+    );
   }
 
   if (weeklyTimetableError) {
@@ -126,14 +127,14 @@ export default function HomePage() {
             <Timetable
               header={todaysTimetable.inStopName}
               values={todaysTimetable.inStopTimes}
-              timeNow={lastUpdated ? formatTime(lastUpdated) : ""}
+              timeNow={lastRefreshed ? getTimeNow(lastRefreshed) : ""}
             />
           </div>
           <div className="w-1/2 overflow-auto">
             <Timetable
               header={todaysTimetable.outStopName}
               values={todaysTimetable.outStopTimes}
-              timeNow={lastUpdated ? formatTime(lastUpdated) : ""}
+              timeNow={lastRefreshed ? getTimeNow(lastRefreshed) : ""}
             />
           </div>
         </div>
@@ -142,12 +143,10 @@ export default function HomePage() {
         </div>
       </div>
       <footer className="mt-auto py-2 text-center text-sm text-gray-300">
-        Gellért Kovács, 2025
-        {lastUpdated && (
-          <span className="ml-4">
-            Vehicles last updated: {lastUpdated.toLocaleTimeString()}
-          </span>
-        )}
+        Developed by Gellért Kovács, 2025
+        <span className="ml-4">
+          Last refreshed: {lastRefreshed.toLocaleTimeString()}
+        </span>
       </footer>
     </main>
   );

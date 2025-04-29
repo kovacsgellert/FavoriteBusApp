@@ -5,18 +5,8 @@ import { useEffect, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import type { TranzyVehicle } from "./models";
 
-const greenBusIcon = new L.Icon({
-  iconUrl: "/bus-green.png",
-  iconSize: [24, 24],
-});
-
 const orangeBusIcon = new L.Icon({
   iconUrl: "/bus-orange.png",
-  iconSize: [24, 24],
-});
-
-const purpleBusIcon = new L.Icon({
-  iconUrl: "/bus-purple.png",
   iconSize: [24, 24],
 });
 
@@ -68,19 +58,18 @@ export default function Map({ vehicles }: MapProps) {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {vehicles &&
-        vehicles.map((vehicle) => (
-          <Marker
-            key={vehicle.id}
-            position={[vehicle.latitude, vehicle.longitude]}
-            icon={getIcon(vehicle)}
-          >
-            <Popup>
-              Label: {vehicle.label} <br />
-              Speed: {vehicle.speed} km/h <br />
-            </Popup>
-          </Marker>
-        ))}
+      {vehicles?.map((vehicle) => (
+        <Marker
+          key={vehicle.id}
+          position={[vehicle.latitude, vehicle.longitude]}
+          icon={getIcon(vehicle)}
+        >
+          <Popup>
+            Label: {vehicle.label} <br />
+            Speed: {vehicle.speed} km/h <br />
+          </Popup>
+        </Marker>
+      ))}
     </MapContainer>
   );
 }
