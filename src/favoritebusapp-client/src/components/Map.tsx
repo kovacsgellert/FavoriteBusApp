@@ -1,9 +1,8 @@
-"use client";
-
+// ...existing code from map.tsx...
 import L from "leaflet";
 import { useEffect, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
-import type { TranzyVehicle } from "./models";
+import type { TranzyVehicle } from "../models";
 
 const orangeBusIcon = new L.Icon({
   iconUrl: "/bus-orange.png",
@@ -73,3 +72,4 @@ export default function Map({ vehicles }: MapProps) {
     </MapContainer>
   );
 }
+// ...existing code from map.tsx...

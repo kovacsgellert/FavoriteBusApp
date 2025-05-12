@@ -1,15 +1,14 @@
-"use client";
-
 import { useEffect, useState } from "react";
-import type { CtpWeeklyTimetable, TranzyVehicle } from "./models";
-import Timetable from "./timetable";
-import dynamic from "next/dynamic";
+import type {
+  CtpWeeklyTimetable,
+  TranzyVehicle,
+  CtpDailyTimetable,
+} from "./models";
+import Timetable from "./components/Timetable";
+import Map from "./components/Map";
 import { API_URL } from "./constants";
 
-// leaflet requires dynamic import to avoid SSR issues
-const DynamicMap = dynamic(() => import("./map"), { ssr: false });
-
-export default function HomePage() {
+export default function App() {
   const [weeklyTimetable, setWeeklyTimetable] =
     useState<CtpWeeklyTimetable | null>(null);
   const [weeklyTimetableLoading, setWeeklyTimetableLoading] = useState(true);
@@ -112,8 +111,12 @@ export default function HomePage() {
 
   const todaysType = getTodaysType();
   const todaysTimetable = weeklyTimetable.dailyTimetables.find(
-    (timetable) => timetable.dayType === todaysType,
-  )!;
+    (timetable: CtpDailyTimetable) => timetable.dayType === todaysType,
+  );
+
+  if (!todaysTimetable) {
+    return <div>No timetable for today</div>;
+  }
 
   return (
     <main className="flex h-screen flex-col overflow-hidden bg-gradient-to-b from-[#1a6347] to-[#15162c] text-white">
@@ -139,7 +142,7 @@ export default function HomePage() {
           </div>
         </div>
         <div className="h-1/2 md:h-auto md:w-2/3">
-          <DynamicMap vehicles={vehicles} />
+          <Map vehicles={vehicles} />
         </div>
       </div>
       <footer className="mt-auto py-2 text-center text-sm text-gray-300">

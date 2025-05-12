@@ -1,3 +1,4 @@
+// ...existing code from models.ts...
 export type CtpWeeklyTimetable = {
   routeName: string;
   routeLongName: string;
@@ -28,3 +29,4 @@ export type TranzyVehicle = {
   bike_accessible: string;
   wheelchair_accessible: string;
 };
+// ...existing code from models.ts...

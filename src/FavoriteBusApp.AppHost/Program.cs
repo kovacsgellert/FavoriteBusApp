@@ -9,7 +9,7 @@ var client = builder
     .WithNpmPackageInstallation()
     .WaitFor(api)
     .WithReference(api)
-    .WithHttpEndpoint(port: 3001, targetPort: 3000, env: "PORT")
+    .WithHttpEndpoint(port: 3001, targetPort: 3000, env: "VITE_PORT")
     .WithExternalHttpEndpoints();
 
 builder.Build().Run();
