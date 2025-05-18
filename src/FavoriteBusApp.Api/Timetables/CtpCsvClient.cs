@@ -31,6 +31,14 @@ public class CtpCsvClient
             throw new ArgumentException($"Invalid day type: {dayType}", nameof(dayType));
 
         var content = await GetCsvContent(routeName, dayType);
+        File.WriteAllText(
+            Path.Combine(
+                Directory.GetCurrentDirectory(),
+                @"..\..\assets",
+                $"timetable_{routeName}_{dayType}.csv"
+            ),
+            content
+        );
         var timetable = _csvParser.ParseCsv(routeName, content);
 
         return timetable;

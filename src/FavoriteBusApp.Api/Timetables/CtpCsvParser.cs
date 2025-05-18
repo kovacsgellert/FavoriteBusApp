@@ -61,7 +61,8 @@ public class CtpCsvParser
 
     private static DateOnly ParseDate(string dateStr)
     {
-        // Expected format: DD.MM.YYYY
+        dateStr = dateStr.Trim().Replace(',', '.');
+
         if (
             DateOnly.TryParseExact(
                 dateStr,

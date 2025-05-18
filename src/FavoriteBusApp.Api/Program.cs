@@ -9,16 +9,16 @@ builder.AddServiceDefaults();
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
-// builder.Services.AddCors(options =>
-// {
-//     options.AddPolicy(
-//         "AllowAllOrigins",
-//         builder =>
-//         {
-//             builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-//         }
-//     );
-// });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "AllowAllOrigins",
+        builder =>
+        {
+            builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        }
+    );
+});
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
@@ -38,7 +38,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    // app.UseCors("AllowAllOrigins");
+    app.UseCors("AllowAllOrigins");
 }
 else
 {
@@ -102,5 +102,43 @@ app.MapGet(
         }
     )
     .WithName("GetVehicles");
+
+app.MapGet(
+        "/api/timetables/download",
+        async (CtpCsvClient csvClient) =>
+        {
+            try
+            {
+                string timetablesDir = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    @"..\..\assets"
+                );
+
+                var weekdaysTimetable = await csvClient.GetDailyTimetable(
+                    "25",
+                    DayTypeConstants.Weekdays
+                );
+                var saturdayTimetable = await csvClient.GetDailyTimetable(
+                    "25",
+                    DayTypeConstants.Saturday
+                );
+                var sundayTimetable = csvClient.GetDailyTimetable("25", DayTypeConstants.Sunday);
+
+                return Results.Ok(
+                    new
+                    {
+                        weekdaysTimetable,
+                        saturdayTimetable,
+                        sundayTimetable,
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem($"Error downloading timetable: {ex.Message}");
+            }
+        }
+    )
+    .WithName("DownloadTimetables");
 
 app.Run();
