@@ -6,7 +6,6 @@ import { CtpWeeklyTimetable } from "./models/CtpWeeklyTimetable";
 import { TranzyVehicle } from "./models/TranzyVehicle";
 import "leaflet/dist/leaflet.css";
 
-const API_URL = "http://localhost:5000/api";
 export default function HomePage() {
   const [weeklyTimetable, setWeeklyTimetable] =
     useState<CtpWeeklyTimetable | null>(null);
@@ -24,7 +23,7 @@ export default function HomePage() {
     setWeeklyTimetableLoading(true);
     setWeeklyTimetableError(null);
     try {
-      const response = await fetch(`${API_URL}/timetables`);
+      const response = await fetch("api/timetables");
       if (!response.ok) {
         throw new Error(
           "Failed to fetch weekly timetable. Status: " + response.status
@@ -45,7 +44,7 @@ export default function HomePage() {
     setVehiclesLoading(true);
     setVehiclesError(null);
     try {
-      const response = await fetch(`${API_URL}/vehicles`);
+      const response = await fetch("api/vehicles");
       if (!response.ok) {
         throw new Error("Failed to fetch vehicles. Status: " + response.status);
       }
