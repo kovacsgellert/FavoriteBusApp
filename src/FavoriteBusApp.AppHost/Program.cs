@@ -5,7 +5,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 var api = builder.AddProject<FavoriteBusApp_Api>("api").WithExternalHttpEndpoints();
 
 builder
-    .AddNpmApp("reactvite", "../favoritebusapp-client-reactvite", "dev")
+    .AddNpmApp("client", "../favoritebusapp-client", "dev")
     .WithNpmPackageInstallation()
     .WaitFor(api)
     .WithReference(api)
@@ -13,13 +13,5 @@ builder
     .WithHttpEndpoint(port: 3000, targetPort: 2999, env: "VITE_PORT")
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
-
-// var client = builder
-//     .AddNpmApp("client", "../favoritebusapp-client", "dev")
-//     .WithNpmPackageInstallation()
-//     .WaitFor(api)
-//     .WithReference(api)
-//     .WithHttpEndpoint(port: 3001, targetPort: 3000, env: "PORT")
-//     .WithExternalHttpEndpoints();
 
 builder.Build().Run();
