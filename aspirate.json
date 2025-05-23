@@ -1,0 +1,13 @@
+{
+  "TemplatePath": null,
+  "ContainerSettings": {
+    "Registry": null,
+    "RepositoryPrefix": "kovacsgellert",
+    "Tags": [
+      "latest"
+    ],
+    "Builder": "docker",
+    "BuildArgs": null,
+    "Context": null
+  }
+}

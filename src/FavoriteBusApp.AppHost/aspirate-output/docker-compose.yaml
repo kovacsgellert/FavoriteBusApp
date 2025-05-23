@@ -1,0 +1,40 @@
+services:
+  aspire-dashboard:
+    container_name: "aspire-dashboard"
+    image: "mcr.microsoft.com/dotnet/aspire-dashboard:9.0"
+    environment:
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
+    ports:
+    - target: 18888
+      published: 18888
+    restart: unless-stopped
+  api:
+    container_name: "api"
+    image: "api:latest"
+    environment:
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      HTTP_PORTS: "8080"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://aspire-dashboard:18889"
+      OTEL_SERVICE_NAME: "api"
+    ports:
+    - target: 8080
+      published: 10000
+    - target: 8443
+      published: 10001
+    restart: unless-stopped
+  reactvite:
+    container_name: "reactvite"
+    environment:
+      NODE_ENV: "development"
+      services__api__http__0: "http://api:8080"
+      BROWSER: "none"
+      VITE_PORT: "2999"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://aspire-dashboard:18889"
+      OTEL_SERVICE_NAME: "reactvite"
+    ports:
+    - target: 2999
+      published: 3000
+    restart: unless-stopped
