@@ -1,15 +1,15 @@
-FROM node:20 as build
+FROM node:24-slim AS build
 
 WORKDIR /app
 
-COPY package.json package.json
-COPY package-lock.json package-lock.json
+COPY src/favoritebusapp-client/package.json package.json
+COPY src/favoritebusapp-client/package-lock.json package-lock.json
 
 RUN npm install
 
-COPY . .
+COPY src/favoritebusapp-client .
 
-RUN npm run build
+RUN npm run build --loglevel=error
 
 FROM nginx:alpine
 

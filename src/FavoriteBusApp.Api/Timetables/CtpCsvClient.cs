@@ -23,22 +23,21 @@ public class CtpCsvClient
         _csvParser = csvParser;
     }
 
-    public async Task<CtpDailyTimetable> GetDailyTimetable(string routeName, string dayType)
+    public async Task<CtpDailyTimetable> DownloadDailyTimetable(
+        string routeName,
+        string dayType,
+        string path
+    )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(routeName, nameof(routeName));
         ArgumentException.ThrowIfNullOrWhiteSpace(dayType, nameof(dayType));
+        ArgumentException.ThrowIfNullOrWhiteSpace(path, nameof(path));
+
         if (!_urlDayTypeMap.ContainsKey(dayType))
             throw new ArgumentException($"Invalid day type: {dayType}", nameof(dayType));
 
         var content = await GetCsvContent(routeName, dayType);
-        File.WriteAllText(
-            Path.Combine(
-                Directory.GetCurrentDirectory(),
-                @"..\..\assets",
-                $"timetable_{routeName}_{dayType}.csv"
-            ),
-            content
-        );
+        File.WriteAllText(Path.Combine(path, $"timetable_{routeName}_{dayType}.csv"), content);
         var timetable = _csvParser.ParseCsv(routeName, content);
 
         return timetable;

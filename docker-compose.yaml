@@ -1,0 +1,45 @@
+services:
+  aspire-dashboard:
+    container_name: "aspire-dashboard"
+    image: "mcr.microsoft.com/dotnet/aspire-dashboard:9.0"
+    environment:
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
+    ports:
+      - target: 18888
+        published: 18888
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: src/FavoriteBusApp.Api/Dockerfile
+    ports:
+      - target: 8080
+        published: 5000
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://aspire-dashboard:18889"
+      OTEL_SERVICE_NAME: "api"
+      Tranzy__ApiKey: ${Tranzy__ApiKey:?Tranzy__ApiKey is required, please set it in your environment}
+    restart: unless-stopped
+
+  client:
+    build:
+      context: .
+      dockerfile: src/favoritebusapp-client/Dockerfile
+    ports:
+      - target: 3000
+        published: 3000
+    environment:
+      VITE_API_URL: "http://api:8080"
+      NODE_ENV: "development"
+      BROWSER: "none"
+      VITE_PORT: "3000"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://aspire-dashboard:18889"
+      OTEL_SERVICE_NAME: "client"
+    depends_on:
+      - api

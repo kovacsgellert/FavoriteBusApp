@@ -401,3 +401,5 @@ FodyWeavers.xsd
 # Output files from the CLI program
 timetable_*.csv
 orar_*.html
+
+.env

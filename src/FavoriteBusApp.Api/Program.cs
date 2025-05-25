@@ -51,10 +51,10 @@ app.MapGet(
         {
             try
             {
-                string timetablesDir = Path.Combine(
-                    Directory.GetCurrentDirectory(),
-                    @"..\..\assets"
-                );
+                string timetablesDir = Path.Combine(Directory.GetCurrentDirectory(), @"timetables");
+
+                if (!Directory.Exists(timetablesDir))
+                    return Results.Problem("Timetables directory does not exist.");
 
                 var weekdaysTimetable = csvParser.ParseCsvFile(
                     "25",
@@ -109,20 +109,26 @@ app.MapGet(
         {
             try
             {
-                string timetablesDir = Path.Combine(
-                    Directory.GetCurrentDirectory(),
-                    @"..\..\assets"
-                );
+                string timetablesDir = Path.Combine(Directory.GetCurrentDirectory(), @"timetables");
 
-                var weekdaysTimetable = await csvClient.GetDailyTimetable(
+                if (!Directory.Exists(timetablesDir))
+                    Directory.CreateDirectory(timetablesDir);
+
+                var weekdaysTimetable = await csvClient.DownloadDailyTimetable(
                     "25",
-                    DayTypeConstants.Weekdays
+                    DayTypeConstants.Weekdays,
+                    timetablesDir
                 );
-                var saturdayTimetable = await csvClient.GetDailyTimetable(
+                var saturdayTimetable = await csvClient.DownloadDailyTimetable(
                     "25",
-                    DayTypeConstants.Saturday
+                    DayTypeConstants.Saturday,
+                    timetablesDir
                 );
-                var sundayTimetable = csvClient.GetDailyTimetable("25", DayTypeConstants.Sunday);
+                var sundayTimetable = csvClient.DownloadDailyTimetable(
+                    "25",
+                    DayTypeConstants.Sunday,
+                    timetablesDir
+                );
 
                 return Results.Ok(
                     new
@@ -135,7 +141,9 @@ app.MapGet(
             }
             catch (Exception ex)
             {
-                return Results.Problem($"Error downloading timetable: {ex.Message}");
+                return Results.Problem(
+                    $"Error downloading timetable: {ex.Message}\n {ex.StackTrace}"
+                );
             }
         }
     )

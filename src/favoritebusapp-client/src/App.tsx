@@ -15,8 +15,6 @@ export default function HomePage() {
   >(null);
 
   const [vehicles, setVehicles] = useState<TranzyVehicle[]>([]);
-  const [vehiclesLoading, setVehiclesLoading] = useState(true);
-  const [vehiclesError, setVehiclesError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   const fetchWeeklyTimetable = async () => {
@@ -41,8 +39,6 @@ export default function HomePage() {
   };
 
   const fetchVehicles = async () => {
-    setVehiclesLoading(true);
-    setVehiclesError(null);
     try {
       const response = await fetch("api/vehicles");
       if (!response.ok) {
@@ -52,11 +48,7 @@ export default function HomePage() {
       setVehicles(data);
       setLastUpdated(new Date()); // Set last updated timestamp
     } catch (err: unknown) {
-      setVehiclesError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
     } finally {
-      setVehiclesLoading(false);
     }
   };
 

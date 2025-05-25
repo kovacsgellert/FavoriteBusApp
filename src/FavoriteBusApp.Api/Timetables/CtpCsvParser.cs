@@ -5,6 +5,13 @@ namespace FavoriteBusApp.Api.Timetables;
 
 public class CtpCsvParser
 {
+    private readonly ILogger<CtpCsvParser> _logger;
+
+    public CtpCsvParser(ILogger<CtpCsvParser> logger)
+    {
+        _logger = logger;
+    }
+
     private static readonly Dictionary<string, string> _csvDayTypeMap = new()
     {
         { "Luni-Vineri", DayTypeConstants.Weekdays },
@@ -23,7 +30,7 @@ public class CtpCsvParser
         ArgumentException.ThrowIfNullOrWhiteSpace(routeName, nameof(routeName));
         ArgumentException.ThrowIfNullOrWhiteSpace(csvContent, nameof(csvContent));
 
-        var lines = csvContent.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+        var lines = csvContent.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
 
         if (lines.Length < 5)
             throw new ArgumentException(
@@ -43,6 +50,13 @@ public class CtpCsvParser
         for (int i = 5; i < lines.Length; i++)
         {
             var times = lines[i].Split(',');
+
+            if (times.Length < 2)
+            {
+                _logger.LogWarning($"Skipping line {i + 1} due to insufficient data: {lines[i]}");
+                continue;
+            }
+
             if (TimeOnly.TryParse(times[0], out var inTime))
                 timetable.InStopTimes.Add(inTime);
 
@@ -53,7 +67,7 @@ public class CtpCsvParser
         return timetable;
     }
 
-    private static string ParseHeaderLine(string line)
+    private string ParseHeaderLine(string line)
     {
         var parts = line.Split(',', 2);
         return parts.Length > 1 ? parts[1].Trim() : string.Empty;
