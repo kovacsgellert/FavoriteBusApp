@@ -1,7 +1,8 @@
 using System.Globalization;
-using FavoriteBusApp.Api.Timetables.Models;
+using System.Threading.Tasks;
+using FavoriteBusApp.Api.Timetables.CtpIntegration.Models;
 
-namespace FavoriteBusApp.Api.Timetables;
+namespace FavoriteBusApp.Api.Timetables.CtpIntegration;
 
 public class CtpCsvParser
 {
@@ -19,9 +20,9 @@ public class CtpCsvParser
         { "Duminica", DayTypeConstants.Sunday },
     };
 
-    public CtpDailyTimetable ParseCsvFile(string routeName, string filePath)
+    public async Task<CtpDailyTimetable> ParseCsvFile(string routeName, string filePath)
     {
-        var csvContent = File.ReadAllText(filePath);
+        var csvContent = await File.ReadAllTextAsync(filePath);
         return ParseCsv(routeName, csvContent);
     }
 
@@ -30,7 +31,7 @@ public class CtpCsvParser
         ArgumentException.ThrowIfNullOrWhiteSpace(routeName, nameof(routeName));
         ArgumentException.ThrowIfNullOrWhiteSpace(csvContent, nameof(csvContent));
 
-        var lines = csvContent.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+        var lines = ParseLines(csvContent);
 
         if (lines.Length < 5)
             throw new ArgumentException(
@@ -67,7 +68,18 @@ public class CtpCsvParser
         return timetable;
     }
 
-    private string ParseHeaderLine(string line)
+    private static string[] ParseLines(string csvContent)
+    {
+        csvContent = csvContent
+            .Trim()
+            .Replace("\r\n", "\n") // Normalize Windows line endings
+            .Replace("\r", "\n"); // Normalize old Mac line endings
+
+        var lines = csvContent.Split("\n", StringSplitOptions.RemoveEmptyEntries);
+        return lines;
+    }
+
+    private static string ParseHeaderLine(string line)
     {
         var parts = line.Split(',', 2);
         return parts.Length > 1 ? parts[1].Trim() : string.Empty;
@@ -78,7 +90,7 @@ public class CtpCsvParser
         dateStr = dateStr.Trim().Replace(',', '.');
 
         if (
-            DateOnly.TryParseExact(
+            !DateOnly.TryParseExact(
                 dateStr,
                 "dd.MM.yyyy",
                 CultureInfo.InvariantCulture,
@@ -87,11 +99,11 @@ public class CtpCsvParser
             )
         )
         {
-            return date;
+            throw new ArgumentException(
+                $"Invalid date format: {dateStr}. Expected format is DD.MM.YYYY."
+            );
         }
 
-        throw new ArgumentException(
-            $"Invalid date format: {dateStr}. Expected format is DD.MM.YYYY."
-        );
+        return date;
     }
 }

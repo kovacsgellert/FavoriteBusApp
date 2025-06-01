@@ -1,4 +1,4 @@
-namespace FavoriteBusApp.Api.Timetables;
+namespace FavoriteBusApp.Api.Timetables.CtpIntegration.Models;
 
 public static class DayTypeConstants
 {

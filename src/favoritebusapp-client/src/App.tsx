@@ -21,14 +21,14 @@ export default function HomePage() {
     setWeeklyTimetableLoading(true);
     setWeeklyTimetableError(null);
     try {
-      const response = await fetch("api/timetables");
+      const response = await fetch("api/timetables/25");
       if (!response.ok) {
         throw new Error(
           "Failed to fetch weekly timetable. Status: " + response.status
         );
       }
       const data = await response.json();
-      setWeeklyTimetable(data);
+      setWeeklyTimetable(data.data);
     } catch (err: unknown) {
       setWeeklyTimetableError(
         err instanceof Error ? err.message : "An unknown error occurred"
@@ -40,12 +40,12 @@ export default function HomePage() {
 
   const fetchVehicles = async () => {
     try {
-      const response = await fetch("api/vehicles");
+      const response = await fetch("api/vehicles/25");
       if (!response.ok) {
         throw new Error("Failed to fetch vehicles. Status: " + response.status);
       }
       const data = await response.json();
-      setVehicles(data);
+      setVehicles(data.data);
       setLastUpdated(new Date()); // Set last updated timestamp
     } catch (err: unknown) {
     } finally {

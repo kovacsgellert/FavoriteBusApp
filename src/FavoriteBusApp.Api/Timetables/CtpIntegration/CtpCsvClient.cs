@@ -1,6 +1,6 @@
-using FavoriteBusApp.Api.Timetables.Models;
+using FavoriteBusApp.Api.Timetables.CtpIntegration.Models;
 
-namespace FavoriteBusApp.Api.Timetables;
+namespace FavoriteBusApp.Api.Timetables.CtpIntegration;
 
 public class CtpCsvClient
 {
@@ -37,7 +37,7 @@ public class CtpCsvClient
             throw new ArgumentException($"Invalid day type: {dayType}", nameof(dayType));
 
         var content = await GetCsvContent(routeName, dayType);
-        File.WriteAllText(Path.Combine(path, $"timetable_{routeName}_{dayType}.csv"), content);
+        File.WriteAllText(path, content);
         var timetable = _csvParser.ParseCsv(routeName, content);
 
         return timetable;

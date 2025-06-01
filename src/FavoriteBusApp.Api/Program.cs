@@ -1,6 +1,11 @@
+using FavoriteBusApp.Api.Common;
 using FavoriteBusApp.Api.Locations;
+using FavoriteBusApp.Api.Locations.Models;
 using FavoriteBusApp.Api.Timetables;
-using FavoriteBusApp.Api.Timetables.Models;
+using FavoriteBusApp.Api.Timetables.Contracts;
+using FavoriteBusApp.Api.Timetables.CtpIntegration;
+using FavoriteBusApp.Api.Timetables.CtpIntegration.Models;
+using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +38,8 @@ builder.Services.Configure<TranzyOptions>(builder.Configuration.GetSection("Tran
 builder.Services.AddHttpClient<TranzyClient>();
 builder.Services.AddScoped<TranzyClient>();
 
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -46,54 +53,35 @@ else
 }
 
 app.MapGet(
-        "/api/timetables",
-        (CtpCsvParser csvParser) =>
+        "/api/timetables/{routeName}",
+        async (string routeName, IMediator mediator) =>
         {
-            try
-            {
-                string timetablesDir = Path.Combine(Directory.GetCurrentDirectory(), @"timetables");
-
-                if (!Directory.Exists(timetablesDir))
-                    return Results.Problem("Timetables directory does not exist.");
-
-                var weekdaysTimetable = csvParser.ParseCsvFile(
-                    "25",
-                    Path.Combine(timetablesDir, "timetable_25_weekdays.csv")
-                );
-                var saturdayTimetable = csvParser.ParseCsvFile(
-                    "25",
-                    Path.Combine(timetablesDir, "timetable_25_saturday.csv")
-                );
-                var sundayTimetable = csvParser.ParseCsvFile(
-                    "25",
-                    Path.Combine(timetablesDir, "timetable_25_sunday.csv")
-                );
-
-                var weeklyTimetable = new CtpWeeklyTimeTable
-                {
-                    RouteName = "25",
-                    RouteLongName = weekdaysTimetable.RouteLongName,
-                    DailyTimetables = [weekdaysTimetable, saturdayTimetable, sundayTimetable],
-                };
-
-                return Results.Ok(weeklyTimetable);
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem($"Error retrieving timetable: {ex.Message}");
-            }
+            var result = await mediator.Send(new GetWeeklyTimetableQuery { RouteName = routeName });
+            return result.ToResult();
         }
     )
-    .WithName("GetTimetables");
+    .WithName("GetWeeklyTimetable");
 
 app.MapGet(
-        "/api/vehicles",
-        async (TranzyClient tranzyClient) =>
+        "/api/timetables/download/{routeName}",
+        async (string routeName, IMediator mediator) =>
+        {
+            var result = await mediator.Send(
+                new DownloadWeeklyTimetableCommand { RouteName = routeName }
+            );
+            return result.ToResult();
+        }
+    )
+    .WithName("DownloadWeeklyTimetable");
+
+app.MapGet(
+        "/api/vehicles/{routeName}",
+        async (string routeName, TranzyClient tranzyClient) =>
         {
             try
             {
                 var vehicles = await tranzyClient.GetVehicles(TranzyConstants.Bus25RouteId);
-                return Results.Ok(vehicles);
+                return OperationResult<TranzyVehicle[]>.Ok(vehicles!).ToResult();
             }
             catch (Exception ex)
             {
@@ -102,51 +90,5 @@ app.MapGet(
         }
     )
     .WithName("GetVehicles");
-
-app.MapGet(
-        "/api/timetables/download",
-        async (CtpCsvClient csvClient) =>
-        {
-            try
-            {
-                string timetablesDir = Path.Combine(Directory.GetCurrentDirectory(), @"timetables");
-
-                if (!Directory.Exists(timetablesDir))
-                    Directory.CreateDirectory(timetablesDir);
-
-                var weekdaysTimetable = await csvClient.DownloadDailyTimetable(
-                    "25",
-                    DayTypeConstants.Weekdays,
-                    timetablesDir
-                );
-                var saturdayTimetable = await csvClient.DownloadDailyTimetable(
-                    "25",
-                    DayTypeConstants.Saturday,
-                    timetablesDir
-                );
-                var sundayTimetable = csvClient.DownloadDailyTimetable(
-                    "25",
-                    DayTypeConstants.Sunday,
-                    timetablesDir
-                );
-
-                return Results.Ok(
-                    new
-                    {
-                        weekdaysTimetable,
-                        saturdayTimetable,
-                        sundayTimetable,
-                    }
-                );
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem(
-                    $"Error downloading timetable: {ex.Message}\n {ex.StackTrace}"
-                );
-            }
-        }
-    )
-    .WithName("DownloadTimetables");
 
 app.Run();
