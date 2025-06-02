@@ -57,6 +57,13 @@ app.MapGet(
         async (string routeName, IMediator mediator) =>
         {
             var result = await mediator.Send(new GetWeeklyTimetableQuery { RouteName = routeName });
+
+            if (!result.IsValid)
+            {
+                result = await mediator.Send(
+                    new DownloadWeeklyTimetableCommand { RouteName = routeName }
+                );
+            }
             return result.ToResult();
         }
     )

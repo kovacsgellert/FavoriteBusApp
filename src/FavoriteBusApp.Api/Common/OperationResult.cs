@@ -2,7 +2,7 @@ namespace FavoriteBusApp.Api.Common;
 
 public class OperationResult
 {
-    public List<string> Errors = [];
+    public List<string> Errors { get; set; } = [];
     public bool IsValid => Errors.Count == 0;
 
     public static OperationResult Ok() => new();
