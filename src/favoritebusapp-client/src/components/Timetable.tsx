@@ -12,49 +12,54 @@ export default function Timetable({ header, values, timeNow }: TimetableProps) {
 
   const getTextColor = (value: string) => {
     if (value < timeNow) {
-      return "text-red-500";
+      return "text-gray-400 line-through"; // Add line-through for past departures
     }
-
-    if (value >= timeNow) {
-      return "text-green-500";
+    if (value === nextDeparture) {
+      return "text-green-400 font-bold";
     }
+    return "text-white";
   };
 
   // Auto-scroll to position the next departure in the middle when component updates
   useEffect(() => {
     if (scrollContainerRef.current && nextDeparture) {
-      // Find the next departure row element and scroll directly to it
       const nextDepartureIndex = values.indexOf(nextDeparture);
       if (nextDepartureIndex === -1) return;
-
-      // Find the row by index and scroll it into view
       const targetRow = scrollContainerRef.current.querySelector(
-        `tr:nth-child(${nextDepartureIndex + 1})`,
+        `tr:nth-child(${nextDepartureIndex + 1})`
       );
       if (targetRow) {
-        targetRow.scrollIntoView({ block: "center" });
+        (targetRow as HTMLElement).scrollIntoView({
+          block: "center",
+          behavior: "smooth",
+        });
       }
     }
   }, [nextDeparture, timeNow, values]);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden shadow-md sm:rounded-lg">
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl bg-white/10 shadow-lg backdrop-blur-md">
       {/* Fixed header outside the scrollable area */}
-      <div className="bg-gray-50 px-6 py-3 text-center text-xs font-medium text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
+      <div className="bg-gradient-to-r from-green-400/20 to-blue-400/20 px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-white/90 shadow-md">
         {header}
       </div>
-
       {/* Scrollable body with ref */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
-        <table className="w-full text-center text-sm text-gray-500 dark:text-gray-400">
+        <table className="w-full text-center text-base text-white">
           <tbody>
             {values.map((value, index) => (
               <tr
                 key={index}
-                className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                className={`transition-colors duration-200 ${
+                  value === nextDeparture
+                    ? "bg-green-500/10"
+                    : "hover:bg-white/5"
+                }`}
               >
                 <td
-                  className={`px-6 py-4 ${getTextColor(value)} flex items-center justify-center gap-2`}
+                  className={`px-6 py-3 ${getTextColor(
+                    value
+                  )} flex items-center justify-center gap-2`}
                 >
                   <span>{value}</span>
                   {value === nextDeparture && (

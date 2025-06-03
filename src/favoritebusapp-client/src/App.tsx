@@ -16,6 +16,7 @@ export default function HomePage() {
 
   const [vehicles, setVehicles] = useState<TranzyVehicle[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [secondsToNextUpdate, setSecondsToNextUpdate] = useState(30);
 
   const fetchWeeklyTimetable = async () => {
     setWeeklyTimetableLoading(true);
@@ -46,7 +47,7 @@ export default function HomePage() {
       }
       const data = await response.json();
       setVehicles(data.data);
-      setLastUpdated(new Date()); // Set last updated timestamp
+      setLastUpdated(new Date());
     } catch (err: unknown) {
     } finally {
     }
@@ -71,31 +72,61 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    // Initial data fetch
     fetchWeeklyTimetable();
     fetchVehicles();
 
     // Set up interval for vehicles refresh every 30 seconds
     const vehiclesRefreshInterval = setInterval(() => {
       fetchVehicles();
+      setSecondsToNextUpdate(30);
     }, 30000);
 
-    // Clean up interval on component unmount
+    // Countdown timer for next update
+    const countdownInterval = setInterval(() => {
+      setSecondsToNextUpdate((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    // Clean up intervals on component unmount
     return () => {
       clearInterval(vehiclesRefreshInterval);
+      clearInterval(countdownInterval);
     };
   }, []);
 
   if (weeklyTimetableLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-green-900 to-blue-900">
+        <div className="rounded-xl bg-white/10 px-8 py-6 shadow-xl backdrop-blur-md">
+          <span className="block animate-pulse text-lg font-semibold text-white">
+            Loading...
+          </span>
+        </div>
+      </div>
+    );
   }
 
   if (weeklyTimetableError) {
-    return <div>Error: {weeklyTimetableError}</div>;
+    return (
+      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-red-900 to-pink-900">
+        <div className="rounded-xl bg-white/10 px-8 py-6 shadow-xl backdrop-blur-md">
+          <span className="block text-lg font-semibold text-white">
+            Error: {weeklyTimetableError}
+          </span>
+        </div>
+      </div>
+    );
   }
 
   if (!weeklyTimetable || weeklyTimetable.dailyTimetables.length === 0) {
-    return <div>No data available</div>;
+    return (
+      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+        <div className="rounded-xl bg-white/10 px-8 py-6 shadow-xl backdrop-blur-md">
+          <span className="block text-lg font-semibold text-white">
+            No data available
+          </span>
+        </div>
+      </div>
+    );
   }
 
   const todaysType = getTodaysType();
@@ -104,21 +135,35 @@ export default function HomePage() {
   )!;
 
   return (
-    <main className="flex h-screen flex-col overflow-hidden bg-gradient-to-b from-[#1a6347] to-[#15162c] text-white">
-      <h1 className="py-3 text-center text-xl font-bold md:text-3xl">
-        {todaysType.toUpperCase()} - {todaysTimetable.routeName} (
-        {todaysTimetable.routeLongName})
-      </h1>
-      <div className="container mx-auto flex flex-grow flex-col gap-4 overflow-hidden px-4 md:flex-row">
-        <div className="flex h-1/2 flex-row gap-4 md:h-auto md:w-1/3">
-          <div className="w-1/2 overflow-auto">
+    <main className="flex h-screen flex-col overflow-hidden bg-gradient-to-br from-[#1a6347] via-[#2e3c7e] to-[#15162c] text-white">
+      <header className="z-10 flex flex-col items-center justify-center bg-white/10 py-6 shadow-lg backdrop-blur-md md:flex-row md:justify-between md:px-6 lg:px-12">
+        <h1 className="text-xl font-extrabold tracking-tight text-center md:text-2xl lg:text-4xl">
+          {todaysTimetable.routeName}
+          <span className="ml-2 text-blue-200">
+            ({todaysTimetable.routeLongName})
+          </span>
+          <br />
+          <span className="text-green-300">{todaysType.toUpperCase()}</span>
+        </h1>
+        <div className="mt-2 text-xs text-gray-200 md:mt-0 md:text-sm">
+          {lastUpdated && (
+            <span>
+              Last updated: {lastUpdated.toLocaleTimeString()} &nbsp;|
+              &nbsp;Next update in {secondsToNextUpdate}s
+            </span>
+          )}
+        </div>
+      </header>
+      <div className="container mx-auto flex flex-grow flex-col gap-4 overflow-hidden px-1 py-2 sm:px-2 sm:py-4 md:flex-row md:gap-8 md:px-4 lg:px-8">
+        <div className="flex flex-row gap-2 h-1/2 md:h-auto md:w-1/3 md:gap-4">
+          <div className="w-1/2 min-w-0 overflow-auto">
             <Timetable
               header={todaysTimetable.inStopName}
               values={todaysTimetable.inStopTimes}
               timeNow={lastUpdated ? formatTime(lastUpdated) : ""}
             />
           </div>
-          <div className="w-1/2 overflow-auto">
+          <div className="w-1/2 min-w-0 overflow-auto">
             <Timetable
               header={todaysTimetable.outStopName}
               values={todaysTimetable.outStopTimes}
@@ -126,17 +171,24 @@ export default function HomePage() {
             />
           </div>
         </div>
-        <div className="h-1/2 md:h-auto md:w-2/3">
+        <div className="h-1/2 min-h-[250px] md:h-auto md:w-2/3">
           <Map vehicles={vehicles} />
         </div>
       </div>
-      <footer className="mt-auto py-2 text-center text-sm text-gray-300">
-        Gellért Kovács, 2025
-        {lastUpdated && (
-          <span className="ml-4">
-            Vehicles last updated: {lastUpdated.toLocaleTimeString()}
-          </span>
-        )}
+      <footer className="mt-auto py-3 text-center text-xs text-gray-300 bg-white/5 shadow-inner backdrop-blur-md">
+        <span className="font-semibold tracking-wide">
+          © 2025 Gellért Kovács.
+        </span>
+        <span className="ml-2">
+          <a
+            href="https://github.com/kovacsgellert/FavoriteBusApp"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-200"
+          >
+            GitHub
+          </a>
+        </span>
       </footer>
     </main>
   );
