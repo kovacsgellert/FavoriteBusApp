@@ -3,17 +3,23 @@ using FavoriteBusApp.Api.Timetables.Contracts;
 using FavoriteBusApp.Api.Timetables.CtpIntegration;
 using FavoriteBusApp.Api.Timetables.CtpIntegration.Models;
 using MediatR;
+using StackExchange.Redis;
 
 namespace FavoriteBusApp.Api.Timetables.RequestHandlers;
 
 public class GetWeeklyTimetableQueryHandler
     : IRequestHandler<GetWeeklyTimetableQuery, OperationResult<CtpWeeklyTimeTable>>
 {
-    private readonly CtpCsvParser _csvParser;
+    private readonly ICtpCsvClient _csvClient;
+    private readonly IConnectionMultiplexer _redisClient;
 
-    public GetWeeklyTimetableQueryHandler(CtpCsvParser csvParser)
+    public GetWeeklyTimetableQueryHandler(
+        ICtpCsvClient csvClient,
+        IConnectionMultiplexer redisClient
+    )
     {
-        _csvParser = csvParser;
+        _csvClient = csvClient;
+        _redisClient = redisClient;
     }
 
     public async Task<OperationResult<CtpWeeklyTimeTable>> Handle(
@@ -21,26 +27,33 @@ public class GetWeeklyTimetableQueryHandler
         CancellationToken cancellationToken
     )
     {
-        string timetablesDir = Path.Combine(Directory.GetCurrentDirectory(), @"timetables");
+        var cacheKey = $"weekly_timatebles:{request.RouteName}";
+        var redisDb = _redisClient.GetDatabase();
 
-        if (!Directory.Exists(timetablesDir))
+        var cachedJson = !request.ForceRefresh
+            ? (await redisDb.StringGetAsync(cacheKey)).ToString()
+            : null;
+
+        if (!string.IsNullOrEmpty(cachedJson))
         {
-            return OperationResult<CtpWeeklyTimeTable>.Fail(
-                "Timetables directory does not exist. Please download the timetables first."
-            );
+            var cachedWeeklyTimetable = JsonSerializer.Deserialize<CtpWeeklyTimeTable>(cachedJson)!;
+
+            return OperationResult<CtpWeeklyTimeTable>.Ok(cachedWeeklyTimetable);
         }
 
-        var weekdaysTimetable = await _csvParser.ParseCsvFile(
+        var weekdaysTimetable = await _csvClient.GetDailyTimetable(
             request.RouteName,
-            Path.Combine(timetablesDir, $"{request.RouteName}_{DayTypeConstants.Weekdays}.csv")
+            DayTypeConstants.Weekdays
         );
-        var saturdayTimetable = await _csvParser.ParseCsvFile(
+
+        var saturdayTimetable = await _csvClient.GetDailyTimetable(
             request.RouteName,
-            Path.Combine(timetablesDir, $"{request.RouteName}_{DayTypeConstants.Saturday}.csv")
+            DayTypeConstants.Saturday
         );
-        var sundayTimetable = await _csvParser.ParseCsvFile(
+
+        var sundayTimetable = await _csvClient.GetDailyTimetable(
             request.RouteName,
-            Path.Combine(timetablesDir, $"{request.RouteName}_{DayTypeConstants.Sunday}.csv")
+            DayTypeConstants.Sunday
         );
 
         var weeklyTimetable = new CtpWeeklyTimeTable
@@ -49,6 +62,12 @@ public class GetWeeklyTimetableQueryHandler
             RouteLongName = weekdaysTimetable.RouteLongName,
             DailyTimetables = [weekdaysTimetable, saturdayTimetable, sundayTimetable],
         };
+
+        await redisDb.StringSetAsync(
+            cacheKey,
+            JsonSerializer.Serialize(weeklyTimetable),
+            TimeSpan.FromDays(7)
+        );
 
         return OperationResult<CtpWeeklyTimeTable>.Ok(weeklyTimetable);
     }

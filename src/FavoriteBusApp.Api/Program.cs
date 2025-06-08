@@ -4,7 +4,6 @@ using FavoriteBusApp.Api.Locations.Models;
 using FavoriteBusApp.Api.Timetables;
 using FavoriteBusApp.Api.Timetables.Contracts;
 using FavoriteBusApp.Api.Timetables.CtpIntegration;
-using FavoriteBusApp.Api.Timetables.CtpIntegration.Models;
 using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,13 +29,13 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new TimeOnlyConverter());
 });
 
-builder.Services.AddHttpClient<CtpCsvClient>();
-builder.Services.AddScoped<CtpCsvClient>();
-builder.Services.AddScoped<CtpCsvParser>();
+builder.AddRedisClient(connectionName: "redis");
+
+builder.Services.AddScoped<ICtpCsvParser, CtpCsvParser>();
+builder.Services.AddScoped<ICtpCsvClient, CtpCsvClient>().AddHttpClient();
 
 builder.Services.Configure<TranzyOptions>(builder.Configuration.GetSection("Tranzy"));
-builder.Services.AddHttpClient<TranzyClient>();
-builder.Services.AddScoped<TranzyClient>();
+builder.Services.AddScoped<ITranzyClient, TranzyClient>().AddHttpClient();
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
 
@@ -57,33 +56,26 @@ app.MapGet(
         async (string routeName, IMediator mediator) =>
         {
             var result = await mediator.Send(new GetWeeklyTimetableQuery { RouteName = routeName });
-
-            if (!result.IsValid)
-            {
-                result = await mediator.Send(
-                    new DownloadWeeklyTimetableCommand { RouteName = routeName }
-                );
-            }
             return result.ToResult();
         }
     )
     .WithName("GetWeeklyTimetable");
 
 app.MapGet(
-        "/api/timetables/download/{routeName}",
-        async (string routeName, IMediator mediator) =>
+        "/api/timetables/{routeName}/refresh",
+        async (string routeName, bool forceRefresh, IMediator mediator) =>
         {
             var result = await mediator.Send(
-                new DownloadWeeklyTimetableCommand { RouteName = routeName }
+                new GetWeeklyTimetableQuery { RouteName = routeName, ForceRefresh = true }
             );
             return result.ToResult();
         }
     )
-    .WithName("DownloadWeeklyTimetable");
+    .WithName("RefreshWeeklyTimetable");
 
 app.MapGet(
         "/api/vehicles/{routeName}",
-        async (string routeName, TranzyClient tranzyClient) =>
+        async (string routeName, ITranzyClient tranzyClient) =>
         {
             try
             {

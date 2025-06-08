@@ -2,7 +2,13 @@ using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var api = builder.AddProject<FavoriteBusApp_Api>("api").WithExternalHttpEndpoints();
+var redis = builder.AddRedis("redis").WithDataVolume("redis-volume", false).WithRedisInsight();
+
+var api = builder
+    .AddProject<FavoriteBusApp_Api>("api")
+    .WithReference(redis)
+    .WaitFor(redis)
+    .WithExternalHttpEndpoints();
 
 builder
     .AddNpmApp("client", "../favoritebusapp-client", "dev")

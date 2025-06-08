@@ -2,10 +2,15 @@ using FavoriteBusApp.Api.Timetables.CtpIntegration.Models;
 
 namespace FavoriteBusApp.Api.Timetables.CtpIntegration;
 
-public class CtpCsvClient
+public interface ICtpCsvClient
+{
+    Task<CtpDailyTimetable> GetDailyTimetable(string routeName, string dayType);
+}
+
+public class CtpCsvClient : ICtpCsvClient
 {
     private readonly HttpClient _httpClient;
-    private readonly CtpCsvParser _csvParser;
+    private readonly ICtpCsvParser _csvParser;
     private const string _baseRefererUrl =
         "https://ctpcj.ro/index.php/ro/orare-linii/linii-urbane/linia-";
     private const string _baseCsvUrl = "https://ctpcj.ro/orare/csv/orar_";
@@ -17,27 +22,21 @@ public class CtpCsvClient
         { DayTypeConstants.Sunday, "d" },
     };
 
-    public CtpCsvClient(HttpClient httpClient, CtpCsvParser csvParser)
+    public CtpCsvClient(HttpClient httpClient, ICtpCsvParser csvParser)
     {
         _httpClient = httpClient;
         _csvParser = csvParser;
     }
 
-    public async Task<CtpDailyTimetable> DownloadDailyTimetable(
-        string routeName,
-        string dayType,
-        string path
-    )
+    public async Task<CtpDailyTimetable> GetDailyTimetable(string routeName, string dayType)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(routeName, nameof(routeName));
         ArgumentException.ThrowIfNullOrWhiteSpace(dayType, nameof(dayType));
-        ArgumentException.ThrowIfNullOrWhiteSpace(path, nameof(path));
 
         if (!_urlDayTypeMap.ContainsKey(dayType))
             throw new ArgumentException($"Invalid day type: {dayType}", nameof(dayType));
 
         var content = await GetCsvContent(routeName, dayType);
-        File.WriteAllText(path, content);
         var timetable = _csvParser.ParseCsv(routeName, content);
 
         return timetable;

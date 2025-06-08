@@ -4,7 +4,13 @@ using FavoriteBusApp.Api.Timetables.CtpIntegration.Models;
 
 namespace FavoriteBusApp.Api.Timetables.CtpIntegration;
 
-public class CtpCsvParser
+public interface ICtpCsvParser
+{
+    Task<CtpDailyTimetable> ParseCsvFile(string routeName, string filePath);
+    CtpDailyTimetable ParseCsv(string routeName, string csvContent);
+}
+
+public class CtpCsvParser : ICtpCsvParser
 {
     private readonly ILogger<CtpCsvParser> _logger;
 

@@ -4,7 +4,12 @@ using Microsoft.Extensions.Options;
 
 namespace FavoriteBusApp.Api.Locations;
 
-public class TranzyClient
+public interface ITranzyClient
+{
+    Task<TranzyVehicle[]> GetVehicles(int routeId, int noOlderThanMinutes = 5);
+}
+
+public class TranzyClient : ITranzyClient
 {
     private readonly HttpClient _httpClient;
     private readonly IOptions<TranzyOptions> _options;
