@@ -6,19 +6,16 @@ import type { TranzyVehicle } from "../models/TranzyVehicle";
 const orangeBusIcon = new L.Icon({
   iconUrl: "/bus-orange.png",
   iconSize: [28, 28],
-  iconAnchor: [14, 28],
   popupAnchor: [0, -28],
 });
 const leftBusIcon = new L.Icon({
   iconUrl: "/bus-left-64.png",
   iconSize: [48, 48],
-  iconAnchor: [24, 48],
   popupAnchor: [0, -48],
 });
 const rightBusIcon = new L.Icon({
   iconUrl: "/bus-right-64.png",
   iconSize: [48, 48],
-  iconAnchor: [24, 48],
   popupAnchor: [0, -48],
 });
 
