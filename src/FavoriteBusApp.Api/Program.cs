@@ -1,6 +1,5 @@
-using FavoriteBusApp.Api.Common;
-using FavoriteBusApp.Api.Locations;
-using FavoriteBusApp.Api.Locations.Models;
+using FavoriteBusApp.Api.Fleet.Contracts;
+using FavoriteBusApp.Api.Fleet.TranzyIntegration;
 using FavoriteBusApp.Api.Timetables;
 using FavoriteBusApp.Api.Timetables.Contracts;
 using FavoriteBusApp.Api.Timetables.CtpIntegration;
@@ -75,19 +74,12 @@ app.MapGet(
 
 app.MapGet(
         "/api/vehicles/{routeName}",
-        async (string routeName, ITranzyClient tranzyClient) =>
+        async (string routeName, IMediator mediator) =>
         {
-            try
-            {
-                var vehicles = await tranzyClient.GetVehicles(TranzyConstants.Bus25RouteId);
-                return OperationResult<TranzyVehicle[]>.Ok(vehicles!).ToResult();
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem($"Error retrieving vehicles: {ex.Message}");
-            }
+            var result = await mediator.Send(new GetActiveVehiclesQuery { RouteName = routeName });
+            return result.ToResult();
         }
     )
-    .WithName("GetVehicles");
+    .WithName("GetActiveVehicles");
 
 app.Run();

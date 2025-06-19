@@ -1,4 +1,4 @@
-namespace FavoriteBusApp.Api.Locations;
+namespace FavoriteBusApp.Api.Fleet.TranzyIntegration;
 
 public static class TranzyConstants
 {

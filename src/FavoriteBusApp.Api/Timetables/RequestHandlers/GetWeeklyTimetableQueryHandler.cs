@@ -37,7 +37,6 @@ public class GetWeeklyTimetableQueryHandler
         if (!string.IsNullOrEmpty(cachedJson))
         {
             var cachedWeeklyTimetable = JsonSerializer.Deserialize<CtpWeeklyTimeTable>(cachedJson)!;
-
             return OperationResult<CtpWeeklyTimeTable>.Ok(cachedWeeklyTimetable);
         }
 

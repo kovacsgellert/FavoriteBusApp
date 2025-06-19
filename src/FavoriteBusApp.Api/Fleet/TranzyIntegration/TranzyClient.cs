@@ -1,8 +1,7 @@
-using System.Text.Json;
-using FavoriteBusApp.Api.Locations.Models;
+using FavoriteBusApp.Api.Fleet.TranzyIntegration.Models;
 using Microsoft.Extensions.Options;
 
-namespace FavoriteBusApp.Api.Locations;
+namespace FavoriteBusApp.Api.Fleet.TranzyIntegration;
 
 public interface ITranzyClient
 {

@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace FavoriteBusApp.Api.Locations.Models;
+namespace FavoriteBusApp.Api.Fleet.TranzyIntegration.Models;
 
 public class TranzyTrip
 {
