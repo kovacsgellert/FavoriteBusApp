@@ -1,0 +1,64 @@
+services:
+  aspire-dashboard:
+    container_name: "aspire-dashboard"
+    image: "mcr.microsoft.com/dotnet/aspire-dashboard:9.0"
+    environment:
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
+    ports:
+      - target: 18888
+        published: 18888
+    restart: unless-stopped
+    networks:
+      - traefik_frontend
+
+  api:
+    container_name: "favoritebusapp-api"
+    image: "ghcr.io/kovacsgellert/favoritebusapp/favoritebusapp-api:latest"
+    ports:
+      - target: 8080
+        published: 5000
+    environment:
+      PUID: ${APPUSER_PUID}
+      PGID: ${APPUSER_PGID}
+      TZ: ${TIME_ZONE_VALUE}
+      ASPNETCORE_ENVIRONMENT: "Development"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://aspire-dashboard:18889"
+      OTEL_SERVICE_NAME: "api"
+      Tranzy__ApiKey: ${Tranzy__ApiKey:?Tranzy__ApiKey is required, please set it in your environment}
+    restart: unless-stopped
+    networks:
+      - traefik_frontend
+
+  client:
+    container_name: "favoritebusapp-client"
+    image: "ghcr.io/kovacsgellert/favoritebusapp/favoritebusapp-client:latest"
+    ports:
+      - target: 3000
+        published: 3000
+    environment:
+      VITE_API_URL: "http://api:8080"
+      NODE_ENV: "development"
+      BROWSER: "none"
+      VITE_PORT: "3000"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://aspire-dashboard:18889"
+      OTEL_SERVICE_NAME: "client"
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - traefik_frontend
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.bus-https.rule=Host(`bus.hermano-web.cc`)
+      - traefik.http.routers.bus-https.entrypoints=websecure
+      - traefik.http.routers.bus-https.tls=true
+      - traefik.http.routers.bus-https.tls.certresolver=cloudflare
+      - traefik.http.services.bus-https.loadbalancer.server.port=3000
+
+networks:
+  traefik_frontend:
+    external: true
