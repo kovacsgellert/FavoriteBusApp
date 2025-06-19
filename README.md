@@ -8,3 +8,4 @@ At the same time it is also a good opportunity for me to learn and experiment wi
 - Containerization (Docker and Docker Compose)
 - Redis Cache
 - Github Actions
+- Bruno API Client
