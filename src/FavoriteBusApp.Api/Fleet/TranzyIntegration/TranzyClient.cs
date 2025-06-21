@@ -5,7 +5,8 @@ namespace FavoriteBusApp.Api.Fleet.TranzyIntegration;
 
 public interface ITranzyClient
 {
-    Task<TranzyVehicle[]> GetVehicles(int routeId, int noOlderThanMinutes = 5);
+    Task<TranzyVehicle[]> GetVehicles();
+    Task<TranzyRoute[]> GetRoutes();
 }
 
 public class TranzyClient : ITranzyClient
@@ -19,7 +20,7 @@ public class TranzyClient : ITranzyClient
         _options = options;
     }
 
-    public async Task<TranzyVehicle[]> GetVehicles(int routeId, int noOlderThanMinutes = 5)
+    public async Task<TranzyVehicle[]> GetVehicles()
     {
         var url = $"{TranzyConstants.TranzyBaseUrl}/vehicles";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -27,18 +28,25 @@ public class TranzyClient : ITranzyClient
         request.Headers.Add("X-Agency-Id", TranzyConstants.CtpAgencyId);
 
         var response = await _httpClient.SendAsync(request);
-
         response.EnsureSuccessStatusCode();
         var content = await response.Content.ReadAsStringAsync();
 
         var vehicles = JsonSerializer.Deserialize<TranzyVehicle[]>(content) ?? [];
+        return vehicles;
+    }
 
-        return
-        [
-            .. vehicles.Where(v =>
-                v.RouteId == routeId
-                && v.Timestamp > DateTime.UtcNow.AddMinutes(-noOlderThanMinutes)
-            ),
-        ];
+    public async Task<TranzyRoute[]> GetRoutes()
+    {
+        var url = $"{TranzyConstants.TranzyBaseUrl}/routes";
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("X-API-KEY", _options.Value.ApiKey);
+        request.Headers.Add("X-Agency-Id", TranzyConstants.CtpAgencyId);
+
+        var response = await _httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        var content = await response.Content.ReadAsStringAsync();
+
+        var routes = JsonSerializer.Deserialize<TranzyRoute[]>(content) ?? [];
+        return routes;
     }
 }

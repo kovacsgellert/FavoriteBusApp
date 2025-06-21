@@ -26,9 +26,12 @@ public class GetActiveVehiclesQueryHandler
         CancellationToken cancellationToken
     )
     {
-        var cacheKey = $"active-vehicles:{request.RouteName}";
+        request.RouteName = request.RouteName.Trim().ToUpperInvariant();
+
         var redisDb = _redisClient.GetDatabase();
-        var cachedJson = (await redisDb.StringGetAsync(cacheKey)).ToString();
+        var cachedJson = (
+            await redisDb.StringGetAsync($"active-vehicles:{request.RouteName}")
+        ).ToString();
 
         if (!string.IsNullOrEmpty(cachedJson))
         {
@@ -36,14 +39,55 @@ public class GetActiveVehiclesQueryHandler
             return OperationResult<TranzyVehicle[]>.Ok(cachedVehicles);
         }
 
-        var vehicles = await _tranzyClient.GetVehicles(TranzyConstants.Bus25RouteId);
+        var activeVehicles = (await _tranzyClient.GetVehicles())
+            .Where(v => v.RouteId.HasValue && v.Timestamp > DateTime.UtcNow.AddMinutes(-5))
+            .ToArray();
+        var routes = await GetRoutes();
+        TranzyVehicle[] result = [];
+
+        foreach (var activeVehiclesPerRoute in activeVehicles.GroupBy(v => v.RouteId))
+        {
+            var routeName = routes
+                .FirstOrDefault(r => r.RouteId == activeVehiclesPerRoute.Key)
+                ?.RouteShortName;
+
+            // for some reason this can happen, don't ask me why
+            if (string.IsNullOrEmpty(routeName))
+                continue;
+
+            await redisDb.StringSetAsync(
+                $"active-vehicles:{routeName}",
+                JsonSerializer.Serialize(activeVehiclesPerRoute.ToArray()),
+                TimeSpan.FromSeconds(30)
+            );
+
+            if (request.RouteName == routeName)
+                result = activeVehiclesPerRoute.ToArray();
+        }
+
+        return OperationResult<TranzyVehicle[]>.Ok(result);
+    }
+
+    private async Task<TranzyRoute[]> GetRoutes()
+    {
+        var cacheKey = $"routes";
+        var redisDb = _redisClient.GetDatabase();
+        var cachedJson = (await redisDb.StringGetAsync(cacheKey)).ToString();
+
+        if (!string.IsNullOrEmpty(cachedJson))
+        {
+            var cachedRoutes = JsonSerializer.Deserialize<TranzyRoute[]>(cachedJson)!;
+            return cachedRoutes;
+        }
+
+        var routes = await _tranzyClient.GetRoutes();
 
         await redisDb.StringSetAsync(
             cacheKey,
-            JsonSerializer.Serialize(vehicles),
-            TimeSpan.FromSeconds(30)
+            JsonSerializer.Serialize(routes),
+            TimeSpan.FromDays(7)
         );
 
-        return OperationResult<TranzyVehicle[]>.Ok(vehicles);
+        return routes;
     }
 }
