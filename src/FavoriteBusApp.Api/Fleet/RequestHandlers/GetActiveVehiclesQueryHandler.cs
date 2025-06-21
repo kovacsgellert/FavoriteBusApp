@@ -49,7 +49,7 @@ public class GetActiveVehiclesQueryHandler
         {
             var routeName = routes
                 .FirstOrDefault(r => r.RouteId == activeVehiclesPerRoute.Key)
-                ?.RouteShortName;
+                ?.RouteShortName.ToUpperInvariant();
 
             // for some reason this can happen, don't ask me why
             if (string.IsNullOrEmpty(routeName))

@@ -27,6 +27,8 @@ public class GetWeeklyTimetableQueryHandler
         CancellationToken cancellationToken
     )
     {
+        request.RouteName = request.RouteName.Trim().ToUpperInvariant();
+
         var cacheKey = $"weekly_timatebles:{request.RouteName}";
         var redisDb = _redisClient.GetDatabase();
 
