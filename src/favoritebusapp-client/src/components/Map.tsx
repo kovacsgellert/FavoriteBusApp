@@ -8,22 +8,31 @@ const orangeBusIcon = new L.Icon({
   iconSize: [28, 28],
   popupAnchor: [0, -28],
 });
-const leftBusIcon = new L.Icon({
-  iconUrl: "/bus-left-64.png",
-  iconSize: [48, 48],
-  popupAnchor: [0, -48],
+
+const greyBusIcon = new L.Icon({
+  iconUrl: "/bus-grey.png",
+  iconSize: [28, 28],
+  popupAnchor: [0, -28],
 });
-const rightBusIcon = new L.Icon({
-  iconUrl: "/bus-right-64.png",
-  iconSize: [48, 48],
-  popupAnchor: [0, -48],
+
+const purpleBusIcon = new L.Icon({
+  iconUrl: "/bus-purple.png",
+  iconSize: [28, 28],
+  popupAnchor: [0, -28],
 });
 
 interface MapProps {
   vehicles: TranzyVehicle[];
+  stops: string[];
 }
 
-export default function Map({ vehicles }: MapProps) {
+interface VehicleMapProps {
+  icon: L.Icon;
+  from: string;
+  to: string;
+}
+
+export default function Map({ vehicles, stops }: MapProps) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -31,14 +40,24 @@ export default function Map({ vehicles }: MapProps) {
     return () => setIsMounted(false);
   }, []);
 
-  const getIcon = (vehicle: TranzyVehicle) => {
-    switch (vehicle.trip_id) {
-      case "14_0":
-        return rightBusIcon;
-      case "14_1":
-        return leftBusIcon;
-      default:
-        return orangeBusIcon;
+  const getVehicleMapProps = (vehicle: TranzyVehicle) => {
+    if (!vehicle.trip_id)
+      return { icon: greyBusIcon, from: "-", to: "-" } as VehicleMapProps;
+
+    if (vehicle.trip_id.endsWith("0")) {
+      return {
+        icon: orangeBusIcon,
+        from: stops[0],
+        to: stops[1],
+      } as VehicleMapProps;
+    } else if (vehicle.trip_id.endsWith("1")) {
+      return {
+        icon: purpleBusIcon,
+        from: stops[1],
+        to: stops[0],
+      } as VehicleMapProps;
+    } else {
+      return { icon: greyBusIcon, from: "-", to: "-" } as VehicleMapProps;
     }
   };
 
@@ -66,10 +85,11 @@ export default function Map({ vehicles }: MapProps) {
             <Marker
               key={vehicle.id}
               position={[vehicle.latitude, vehicle.longitude]}
-              icon={getIcon(vehicle)}
+              icon={getVehicleMapProps(vehicle).icon}
             >
               <Popup>
-                Label: {vehicle.label} <br />
+                From: {getVehicleMapProps(vehicle).from} <br />
+                To: {getVehicleMapProps(vehicle).to} <br />
                 Speed: {vehicle.speed} km/h <br />
               </Popup>
             </Marker>

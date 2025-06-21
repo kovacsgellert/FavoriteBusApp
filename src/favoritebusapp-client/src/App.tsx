@@ -5,8 +5,11 @@ import { CtpDailyTimetable } from "./models/CtpDailyTimetable";
 import { CtpWeeklyTimetable } from "./models/CtpWeeklyTimetable";
 import { TranzyVehicle } from "./models/TranzyVehicle";
 import "leaflet/dist/leaflet.css";
+import { useLocation } from "react-router-dom";
 
-export default function HomePage() {
+export default function App() {
+  const location = useLocation();
+
   const [weeklyTimetable, setWeeklyTimetable] =
     useState<CtpWeeklyTimetable | null>(null);
   const [weeklyTimetableLoading, setWeeklyTimetableLoading] = useState(true);
@@ -18,11 +21,16 @@ export default function HomePage() {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [secondsToNextUpdate, setSecondsToNextUpdate] = useState(30);
 
+  const getRouteNameFromLocationPath = () =>
+    location.pathname.split("/").pop() || "25";
+
   const fetchWeeklyTimetable = async () => {
     setWeeklyTimetableLoading(true);
     setWeeklyTimetableError(null);
     try {
-      const response = await fetch("api/timetables/25");
+      const response = await fetch(
+        "/api/timetables/" + getRouteNameFromLocationPath()
+      );
       if (!response.ok) {
         throw new Error(
           "Failed to fetch weekly timetable. Status: " + response.status
@@ -41,7 +49,9 @@ export default function HomePage() {
 
   const fetchVehicles = async () => {
     try {
-      const response = await fetch("api/vehicles/25");
+      const response = await fetch(
+        "/api/vehicles/" + getRouteNameFromLocationPath()
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch vehicles. Status: " + response.status);
       }
@@ -140,7 +150,7 @@ export default function HomePage() {
         <h1 className="text-xl font-extrabold tracking-tight text-center md:text-2xl lg:text-4xl">
           {todaysTimetable.routeName}
           <span className="ml-2 text-blue-200">
-            ({todaysTimetable.routeLongName})
+            ({todaysTimetable.routeLongName.replace(/"/g, "").trim()})
           </span>
           <br />
           <span className="text-green-300">{todaysType.toUpperCase()}</span>
@@ -161,6 +171,7 @@ export default function HomePage() {
               header={todaysTimetable.inStopName}
               values={todaysTimetable.inStopTimes}
               timeNow={lastUpdated ? formatTime(lastUpdated) : ""}
+              tripIdSufix={0}
             />
           </div>
           <div className="w-1/2 min-w-0 overflow-auto">
@@ -168,11 +179,15 @@ export default function HomePage() {
               header={todaysTimetable.outStopName}
               values={todaysTimetable.outStopTimes}
               timeNow={lastUpdated ? formatTime(lastUpdated) : ""}
+              tripIdSufix={1}
             />
           </div>
         </div>
         <div className="h-1/2 min-h-[250px] md:h-auto md:w-2/3">
-          <Map vehicles={vehicles} />
+          <Map
+            vehicles={vehicles}
+            stops={[todaysTimetable.inStopName, todaysTimetable.outStopName]}
+          />
         </div>
       </div>
       <footer className="mt-auto py-3 text-center bg-white/5 shadow-inner backdrop-blur-md">

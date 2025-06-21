@@ -4,9 +4,15 @@ type TimetableProps = {
   header: string;
   values: string[];
   timeNow: string;
+  tripIdSufix: number;
 };
 
-export default function Timetable({ header, values, timeNow }: TimetableProps) {
+export default function Timetable({
+  header,
+  values,
+  timeNow,
+  tripIdSufix,
+}: TimetableProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const nextDeparture = values.find((value) => value >= timeNow);
 
@@ -41,7 +47,7 @@ export default function Timetable({ header, values, timeNow }: TimetableProps) {
     <div className="flex h-full flex-col overflow-hidden rounded-2xl bg-white/10 shadow-lg backdrop-blur-md">
       {/* Fixed header outside the scrollable area */}
       <div className="bg-gradient-to-r from-green-400/20 to-blue-400/20 px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-white/90 shadow-md">
-        {header}
+        {header.replace(/"/g, "").trim()}
       </div>
       {/* Scrollable body with ref */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
