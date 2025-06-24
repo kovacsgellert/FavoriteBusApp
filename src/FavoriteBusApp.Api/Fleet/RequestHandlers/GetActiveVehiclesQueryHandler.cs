@@ -58,7 +58,7 @@ public class GetActiveVehiclesQueryHandler
             await redisDb.StringSetAsync(
                 $"active-vehicles:{routeName}",
                 JsonSerializer.Serialize(activeVehiclesPerRoute.ToArray()),
-                TimeSpan.FromSeconds(30)
+                TimeSpan.FromSeconds(15)
             );
 
             if (request.RouteName == routeName)

@@ -4,15 +4,9 @@ type TimetableProps = {
   header: string;
   values: string[];
   timeNow: string;
-  tripIdSufix: number;
 };
 
-export default function Timetable({
-  header,
-  values,
-  timeNow,
-  tripIdSufix,
-}: TimetableProps) {
+export default function Timetable({ header, values, timeNow }: TimetableProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const nextDeparture = values.find((value) => value >= timeNow);
 

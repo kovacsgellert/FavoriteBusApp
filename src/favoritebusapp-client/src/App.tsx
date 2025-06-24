@@ -83,13 +83,12 @@ export default function App() {
 
   useEffect(() => {
     fetchWeeklyTimetable();
-    fetchVehicles();
 
-    // Set up interval for vehicles refresh every 30 seconds
+    // Set up interval for vehicles refresh every 15 seconds
     const vehiclesRefreshInterval = setInterval(() => {
       fetchVehicles();
-      setSecondsToNextUpdate(30);
-    }, 30000);
+      setSecondsToNextUpdate(15);
+    }, 15000);
 
     // Countdown timer for next update
     const countdownInterval = setInterval(() => {
@@ -171,7 +170,6 @@ export default function App() {
               header={todaysTimetable.inStopName}
               values={todaysTimetable.inStopTimes}
               timeNow={lastUpdated ? formatTime(lastUpdated) : ""}
-              tripIdSufix={0}
             />
           </div>
           <div className="w-1/2 min-w-0 overflow-auto">
@@ -179,7 +177,6 @@ export default function App() {
               header={todaysTimetable.outStopName}
               values={todaysTimetable.outStopTimes}
               timeNow={lastUpdated ? formatTime(lastUpdated) : ""}
-              tripIdSufix={1}
             />
           </div>
         </div>
