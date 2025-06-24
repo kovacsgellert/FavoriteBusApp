@@ -11,6 +11,27 @@ services:
     networks:
       - traefik_frontend
 
+  redis:
+    container_name: "redis"
+    image: "docker.io/library/redis:7.4"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is missing from env}
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://aspire-dashboard:18889"
+      OTEL_SERVICE_NAME: "redis"
+    volumes:
+      - ${PATH_TO_APPDATA}/favoritebusapp/redis-volume:/data
+    ports:
+      - target: 6379
+        published: 6379
+    command: [
+      "redis-server",
+      "--requirepass", "${REDIS_PASSWORD}",
+      "--save", "60", "1"
+    ]
+    restart: unless-stopped
+    networks:
+      - traefik_frontend
+      
   api:
     container_name: "favoritebusapp-api"
     image: "ghcr.io/kovacsgellert/favoritebusapp/favoritebusapp-api:latest"
@@ -18,8 +39,8 @@ services:
       - target: 8080
         published: 5000
     environment:
-      PUID: ${APPUSER_PUID}
-      PGID: ${APPUSER_PGID}
+      PUID: ${APPUSER_PUID}  
+      PGID: ${APPUSER_PGID}  
       TZ: ${TIME_ZONE_VALUE}
       ASPNETCORE_ENVIRONMENT: "Development"
       OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
@@ -29,6 +50,9 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://aspire-dashboard:18889"
       OTEL_SERVICE_NAME: "api"
       Tranzy__ApiKey: ${Tranzy__ApiKey:?Tranzy__ApiKey is required, please set it in your environment}
+      ConnectionStrings__redis: "redis:6379,password=${REDIS_PASSWORD:?REDIS_PASSWORD is required, please set it in your environment}"
+    depends_on:
+      - redis
     restart: unless-stopped
     networks:
       - traefik_frontend

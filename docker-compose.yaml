@@ -8,6 +8,25 @@ services:
       - target: 18888
         published: 18888
     restart: unless-stopped
+      
+  redis:
+    container_name: "redis"
+    image: "docker.io/library/redis:7.4"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is missing from env}
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://aspire-dashboard:18889"
+      OTEL_SERVICE_NAME: "redis"
+    volumes:
+      - "redis-volume:/data"
+    ports:
+      - target: 6379
+        published: 6379
+    command: [
+      "redis-server",
+      "--requirepass", "${REDIS_PASSWORD}",
+      "--save", "60", "1"
+    ]
+    restart: unless-stopped
 
   api:
     build:
@@ -24,7 +43,8 @@ services:
       ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://aspire-dashboard:18889"
       OTEL_SERVICE_NAME: "api"
-      Tranzy__ApiKey: ${Tranzy__ApiKey:?Tranzy__ApiKey is required, please set it in your environment}
+      Tranzy__ApiKey: ${Tranzy__ApiKey:?Tranzy__ApiKey is missing from env}
+      ConnectionStrings__redis: "redis:6379,password=${REDIS_PASSWORD:?REDIS_PASSWORD is missing from env}"
     restart: unless-stopped
 
   client:
@@ -43,3 +63,6 @@ services:
       OTEL_SERVICE_NAME: "client"
     depends_on:
       - api
+        
+volumes:
+  redis-volume: {}
