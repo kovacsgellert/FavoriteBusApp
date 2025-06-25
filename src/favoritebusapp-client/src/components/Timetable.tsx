@@ -3,14 +3,15 @@ import { useEffect, useRef } from "react";
 type TimetableProps = {
   header: string;
   values: string[];
-  timeNow: string;
+  timeNow: string | null;
 };
 
 export default function Timetable({ header, values, timeNow }: TimetableProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const nextDeparture = values.find((value) => value >= timeNow);
+  const nextDeparture = values.find((value) => timeNow && value >= timeNow);
 
   const getTextColor = (value: string) => {
+    if (!timeNow) return "text-gray-400";
     if (value < timeNow) {
       return "text-gray-400 line-through"; // Add line-through for past departures
     }

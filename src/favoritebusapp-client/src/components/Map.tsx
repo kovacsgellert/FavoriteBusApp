@@ -6,19 +6,16 @@ import { ActiveVehicleDto } from "../models/ActiveVehicleDto";
 const orangeBusIcon = new L.Icon({
   iconUrl: "/bus-orange.png",
   iconSize: [28, 28],
-  popupAnchor: [0, -28],
 });
 
 const greyBusIcon = new L.Icon({
   iconUrl: "/bus-grey.png",
   iconSize: [28, 28],
-  popupAnchor: [0, -28],
 });
 
 const purpleBusIcon = new L.Icon({
   iconUrl: "/bus-purple.png",
   iconSize: [28, 28],
-  popupAnchor: [0, -28],
 });
 
 interface MapProps {
