@@ -11,9 +11,9 @@ export default function Timetable({ header, values, timeNow }: TimetableProps) {
   const nextDeparture = values.find((value) => timeNow && value >= timeNow);
 
   const getTextColor = (value: string) => {
-    if (!timeNow) return "text-gray-400";
+    if (!timeNow) return "text-white";
     if (value < timeNow) {
-      return "text-gray-400 line-through"; // Add line-through for past departures
+      return "text-gray-400 line-through";
     }
     if (value === nextDeparture) {
       return "text-green-400 font-bold";
