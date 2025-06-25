@@ -2,6 +2,7 @@ import L from "leaflet";
 import { useEffect, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import type { TranzyVehicle } from "../models/TranzyVehicle";
+import { ActiveVehicleDto } from "../models/ActiveVehicleDto";
 
 const orangeBusIcon = new L.Icon({
   iconUrl: "/bus-orange.png",
@@ -22,14 +23,8 @@ const purpleBusIcon = new L.Icon({
 });
 
 interface MapProps {
-  vehicles: TranzyVehicle[];
+  vehicles: ActiveVehicleDto[];
   stops: string[];
-}
-
-interface VehicleMapProps {
-  icon: L.Icon;
-  from: string;
-  to: string;
 }
 
 export default function Map({ vehicles, stops }: MapProps) {
@@ -40,25 +35,10 @@ export default function Map({ vehicles, stops }: MapProps) {
     return () => setIsMounted(false);
   }, []);
 
-  const getVehicleMapProps = (vehicle: TranzyVehicle) => {
-    if (!vehicle.trip_id)
-      return { icon: greyBusIcon, from: "-", to: "-" } as VehicleMapProps;
-
-    if (vehicle.trip_id.endsWith("0")) {
-      return {
-        icon: orangeBusIcon,
-        from: stops[0],
-        to: stops[1],
-      } as VehicleMapProps;
-    } else if (vehicle.trip_id.endsWith("1")) {
-      return {
-        icon: purpleBusIcon,
-        from: stops[1],
-        to: stops[0],
-      } as VehicleMapProps;
-    } else {
-      return { icon: greyBusIcon, from: "-", to: "-" } as VehicleMapProps;
-    }
+  const getVehicleIcon = (vehicle: ActiveVehicleDto) => {
+    if (!vehicle.tripId) return greyBusIcon;
+    if (vehicle.tripId.endsWith("0")) return orangeBusIcon;
+    return purpleBusIcon;
   };
 
   if (!isMounted) {
@@ -83,13 +63,13 @@ export default function Map({ vehicles, stops }: MapProps) {
         {vehicles &&
           vehicles.map((vehicle) => (
             <Marker
-              key={vehicle.id}
+              key={vehicle.label}
               position={[vehicle.latitude, vehicle.longitude]}
-              icon={getVehicleMapProps(vehicle).icon}
+              icon={getVehicleIcon(vehicle)}
             >
               <Popup>
-                From: {getVehicleMapProps(vehicle).from} <br />
-                To: {getVehicleMapProps(vehicle).to} <br />
+                From: {vehicle.fromStop} <br />
+                To: {vehicle.toStop} <br />
                 Speed: {vehicle.speed} km/h <br />
               </Popup>
             </Marker>

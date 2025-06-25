@@ -1,4 +1,5 @@
 using FavoriteBusApp.Api.Common;
+using FavoriteBusApp.Api.Fleet.Contracts;
 using FavoriteBusApp.Api.Fleet.TranzyIntegration;
 using FavoriteBusApp.Api.Fleet.TranzyIntegration.Models;
 using MediatR;
@@ -7,7 +8,7 @@ using StackExchange.Redis;
 namespace FavoriteBusApp.Api.Fleet.RequestHandlers;
 
 public class GetActiveVehiclesQueryHandler
-    : IRequestHandler<Contracts.GetActiveVehiclesQuery, OperationResult<TranzyVehicle[]>>
+    : IRequestHandler<GetActiveVehiclesQuery, OperationResult<ActiveVehicleDto[]>>
 {
     private readonly ITranzyClient _tranzyClient;
     private readonly IConnectionMultiplexer _redisClient;
@@ -21,8 +22,8 @@ public class GetActiveVehiclesQueryHandler
         _redisClient = redisClient;
     }
 
-    public async Task<OperationResult<TranzyVehicle[]>> Handle(
-        Contracts.GetActiveVehiclesQuery request,
+    public async Task<OperationResult<ActiveVehicleDto[]>> Handle(
+        GetActiveVehiclesQuery request,
         CancellationToken cancellationToken
     )
     {
@@ -35,15 +36,21 @@ public class GetActiveVehiclesQueryHandler
 
         if (!string.IsNullOrEmpty(cachedJson))
         {
-            var cachedVehicles = JsonSerializer.Deserialize<TranzyVehicle[]>(cachedJson)!;
-            return OperationResult<TranzyVehicle[]>.Ok(cachedVehicles);
+            var cachedVehicles = JsonSerializer.Deserialize<ActiveVehicleDto[]>(cachedJson)!;
+            return OperationResult<ActiveVehicleDto[]>.Ok(cachedVehicles);
         }
 
-        var activeVehicles = (await _tranzyClient.GetVehicles())
-            .Where(v => v.RouteId.HasValue && v.Timestamp > DateTime.UtcNow.AddMinutes(-5))
-            .ToArray();
         var routes = await GetRoutes();
-        TranzyVehicle[] result = [];
+        var trips = await GetTrips();
+        var activeVehicles = (await _tranzyClient.GetVehicles())
+            .Where(v =>
+                v.RouteId.HasValue
+                && !string.IsNullOrEmpty(v.TripId)
+                && v.Timestamp > DateTime.UtcNow.AddMinutes(-5)
+            )
+            .ToArray();
+
+        ActiveVehicleDto[] result = [];
 
         foreach (var activeVehiclesPerRoute in activeVehicles.GroupBy(v => v.RouteId))
         {
@@ -55,17 +62,22 @@ public class GetActiveVehiclesQueryHandler
             if (string.IsNullOrEmpty(routeName))
                 continue;
 
+            var routeTrips = trips.Where(t => t.RouteId == activeVehiclesPerRoute.Key).ToArray();
+            var vehicleDtos = activeVehiclesPerRoute
+                .Select(v => CreateActiveVehicleDto(v, routeName, routeTrips))
+                .ToArray();
+
             await redisDb.StringSetAsync(
                 $"active-vehicles:{routeName}",
-                JsonSerializer.Serialize(activeVehiclesPerRoute.ToArray()),
-                TimeSpan.FromSeconds(15)
+                JsonSerializer.Serialize(vehicleDtos),
+                TimeSpan.FromSeconds(19) // clients are polling every 20 seconds
             );
 
             if (request.RouteName == routeName)
-                result = activeVehiclesPerRoute.ToArray();
+                result = vehicleDtos;
         }
 
-        return OperationResult<TranzyVehicle[]>.Ok(result);
+        return OperationResult<ActiveVehicleDto[]>.Ok(result);
     }
 
     private async Task<TranzyRoute[]> GetRoutes()
@@ -89,5 +101,56 @@ public class GetActiveVehiclesQueryHandler
         );
 
         return routes;
+    }
+
+    private async Task<TranzyTrip[]> GetTrips()
+    {
+        var cacheKey = $"trips";
+        var redisDb = _redisClient.GetDatabase();
+        var cachedJson = (await redisDb.StringGetAsync(cacheKey)).ToString();
+
+        if (!string.IsNullOrEmpty(cachedJson))
+        {
+            var cachedTrips = JsonSerializer.Deserialize<TranzyTrip[]>(cachedJson)!;
+            return cachedTrips;
+        }
+
+        var trips = await _tranzyClient.GetTrips();
+
+        await redisDb.StringSetAsync(
+            cacheKey,
+            JsonSerializer.Serialize(trips),
+            TimeSpan.FromDays(7)
+        );
+
+        return trips;
+    }
+
+    private ActiveVehicleDto CreateActiveVehicleDto(
+        TranzyVehicle vehicle,
+        string routeName,
+        TranzyTrip[] routeTrips
+    )
+    {
+        var fromStop =
+            routeTrips.FirstOrDefault(t => t.TripId != vehicle.TripId)?.TripHeadsign ?? "-";
+        var toStop =
+            routeTrips.FirstOrDefault(t => t.TripId == vehicle.TripId)?.TripHeadsign ?? "-";
+
+        return new ActiveVehicleDto
+        {
+            Label = vehicle.Label,
+            RouteName = routeName,
+            Latitude = vehicle.Latitude,
+            Longitude = vehicle.Longitude,
+            Timestamp = vehicle.Timestamp,
+            Speed = vehicle.Speed,
+            TripId = vehicle.TripId!,
+            FromStop = fromStop,
+            ToStop = toStop,
+            VehicleType = vehicle.VehicleType,
+            BikeAccessible = vehicle.BikeAccessible,
+            WheelchairAccessible = vehicle.WheelchairAccessible,
+        };
     }
 }

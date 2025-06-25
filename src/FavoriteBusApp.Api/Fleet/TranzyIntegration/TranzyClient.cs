@@ -7,6 +7,7 @@ public interface ITranzyClient
 {
     Task<TranzyVehicle[]> GetVehicles();
     Task<TranzyRoute[]> GetRoutes();
+    Task<TranzyTrip[]> GetTrips();
 }
 
 public class TranzyClient : ITranzyClient
@@ -48,5 +49,20 @@ public class TranzyClient : ITranzyClient
 
         var routes = JsonSerializer.Deserialize<TranzyRoute[]>(content) ?? [];
         return routes;
+    }
+
+    public async Task<TranzyTrip[]> GetTrips()
+    {
+        var url = $"{TranzyConstants.TranzyBaseUrl}/trips";
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("X-API-KEY", _options.Value.ApiKey);
+        request.Headers.Add("X-Agency-Id", TranzyConstants.CtpAgencyId);
+
+        var response = await _httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        var content = await response.Content.ReadAsStringAsync();
+
+        var trips = JsonSerializer.Deserialize<TranzyTrip[]>(content) ?? [];
+        return trips;
     }
 }

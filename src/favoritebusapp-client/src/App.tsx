@@ -3,11 +3,12 @@ import Timetable from "./components/Timetable";
 import Map from "./components/Map";
 import { CtpDailyTimetable } from "./models/CtpDailyTimetable";
 import { CtpWeeklyTimetable } from "./models/CtpWeeklyTimetable";
-import { TranzyVehicle } from "./models/TranzyVehicle";
 import "leaflet/dist/leaflet.css";
 import { useLocation } from "react-router-dom";
+import { ActiveVehicleDto } from "./models/ActiveVehicleDto";
 
 export default function App() {
+  const VEHICLE_POLLING_INTERVAL_SECONDS = 20;
   const location = useLocation();
 
   const [weeklyTimetable, setWeeklyTimetable] =
@@ -17,9 +18,11 @@ export default function App() {
     string | null
   >(null);
 
-  const [vehicles, setVehicles] = useState<TranzyVehicle[]>([]);
+  const [vehicles, setVehicles] = useState<ActiveVehicleDto[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  const [secondsToNextUpdate, setSecondsToNextUpdate] = useState(30);
+  const [secondsToNextUpdate, setSecondsToNextUpdate] = useState(
+    VEHICLE_POLLING_INTERVAL_SECONDS
+  );
 
   const getRouteNameFromLocationPath = () =>
     location.pathname.split("/").pop() || "25";
@@ -83,12 +86,13 @@ export default function App() {
 
   useEffect(() => {
     fetchWeeklyTimetable();
+    fetchVehicles();
 
-    // Set up interval for vehicles refresh every 15 seconds
+    // Set up interval for vehicles refresh every 20 seconds
     const vehiclesRefreshInterval = setInterval(() => {
       fetchVehicles();
-      setSecondsToNextUpdate(15);
-    }, 15000);
+      setSecondsToNextUpdate(VEHICLE_POLLING_INTERVAL_SECONDS);
+    }, VEHICLE_POLLING_INTERVAL_SECONDS * 1000);
 
     // Countdown timer for next update
     const countdownInterval = setInterval(() => {
