@@ -1,8 +1,8 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import Timetable from "../../components/Timetable";
 import { CtpWeeklyTimetable } from "../../models/CtpWeeklyTimetable";
 import Footer from "../../components/Footer";
-import { useLocation } from "react-router-dom";
 
 export default function WeeklyTimetable() {
   const location = useLocation();
@@ -94,6 +94,27 @@ export default function WeeklyTimetable() {
           <span className="ml-2 text-blue-200">
             ({weeklyTimetable.routeLongName.replace(/"/g, "").trim()})
           </span>
+          <Link
+            to={"/t/" + getRouteNameFromLocationPath()}
+            className="inline-flex items-center rounded bg-green-600 px-3 py-1 text-white font-bold shadow-lg hover:bg-green-800 hover:scale-105 transition-all text-xs md:text-sm ml-2 h-6 md:h-7 border-2 border-green-300 focus:outline-none focus:ring-2 focus:ring-green-400"
+            title="View Daily Timetable"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-4 h-4 mr-1"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M8 7V3m8 4V3m-9 8h10m-12 8V7a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+              />
+            </svg>
+            Today
+          </Link>
         </h1>
       </header>
       <div className="container mx-auto flex flex-grow flex-col gap-1 overflow-hidden px-2 py-2 sm:px-0 sm:py-4 md:flex-row md:gap-2 md:px-0 lg:px-0">

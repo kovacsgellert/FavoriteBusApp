@@ -4,7 +4,7 @@ import Map from "../../components/Map";
 import { CtpDailyTimetable } from "../../models/CtpDailyTimetable";
 import { CtpWeeklyTimetable } from "../../models/CtpWeeklyTimetable";
 import "leaflet/dist/leaflet.css";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { ActiveVehicleDto } from "../../models/ActiveVehicleDto";
 import Footer from "../../components/Footer";
 
@@ -187,15 +187,40 @@ export default function DailyTimetable() {
             ({todaysTimetable.routeLongName.replace(/"/g, "").trim()})
           </span>
           <br />
-          <span className="text-green-300">{todaysType.toUpperCase()}</span>
+          <span className="flex items-center justify-center gap-2 text-green-300 mt-1">
+            {todaysType.toUpperCase()}
+            <Link
+              to={"/w/" + getRouteNameFromLocationPath()}
+              className="inline-flex items-center rounded bg-green-600 px-3 py-1 text-white font-bold shadow-lg hover:bg-green-800 hover:scale-105 transition-all text-xs md:text-sm ml-2 h-6 md:h-7 border-2 border-green-300 focus:outline-none focus:ring-2 focus:ring-green-400"
+              title="View Weekly Timetable"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-4 h-4 mr-1"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8 7V3m8 4V3m-9 8h10m-12 8V7a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+                />
+              </svg>
+              Weekly
+            </Link>
+          </span>
         </h1>
-        <div className="mt-2 text-xs text-gray-200 md:mt-0 md:text-sm">
-          {lastUpdated && (
-            <span>
-              Last updated: {lastUpdated.toLocaleTimeString()} &nbsp;|
-              &nbsp;Next update in {secondsToNextUpdate}s
-            </span>
-          )}
+        <div className="mt-2 flex flex-col items-center gap-2 md:mt-0 md:flex-row md:gap-4">
+          <span className="text-xs text-gray-200 md:text-sm">
+            {lastUpdated && (
+              <span>
+                Last updated: {lastUpdated.toLocaleTimeString()} &nbsp;|
+                &nbsp;Next update in {secondsToNextUpdate}s
+              </span>
+            )}
+          </span>
         </div>
       </header>
       <div className="container mx-auto flex flex-grow flex-col gap-4 overflow-hidden px-1 py-2 sm:px-2 sm:py-4 md:flex-row md:gap-8 md:px-4 lg:px-8">
