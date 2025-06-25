@@ -22,6 +22,7 @@ public class CtpCsvParser : ICtpCsvParser
     private static readonly Dictionary<string, string> _csvDayTypeMap = new()
     {
         { "Luni-Vineri", DayTypeConstants.Weekdays },
+        { "Luni - Vineri", DayTypeConstants.Weekdays },
         { "Sambata", DayTypeConstants.Saturday },
         { "Duminica", DayTypeConstants.Sunday },
     };
