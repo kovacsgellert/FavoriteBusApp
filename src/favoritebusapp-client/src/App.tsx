@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Timetable from "./components/Timetable";
 import Map from "./components/Map";
 import { CtpDailyTimetable } from "./models/CtpDailyTimetable";
@@ -23,6 +23,8 @@ export default function App() {
   const [secondsToNextUpdate, setSecondsToNextUpdate] = useState(
     VEHICLE_POLLING_INTERVAL_SECONDS
   );
+
+  const vehiclesRefreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const getRouteNameFromLocationPath = () =>
     location.pathname.split("/").pop() || "25";
@@ -84,27 +86,55 @@ export default function App() {
     return `${hours}:${minutes}`;
   };
 
+  // Polling logic with visibility handling
   useEffect(() => {
-    fetchWeeklyTimetable();
-    fetchVehicles();
+    let countdownInterval: NodeJS.Timeout | null = null;
 
-    // Set up interval for vehicles refresh every 20 seconds
-    const vehiclesRefreshInterval = setInterval(() => {
+    const startVehiclePolling = () => {
       fetchVehicles();
       setSecondsToNextUpdate(VEHICLE_POLLING_INTERVAL_SECONDS);
-    }, VEHICLE_POLLING_INTERVAL_SECONDS * 1000);
 
-    // Countdown timer for next update
-    const countdownInterval = setInterval(() => {
-      setSecondsToNextUpdate((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
+      vehiclesRefreshIntervalRef.current = setInterval(() => {
+        fetchVehicles();
+        setSecondsToNextUpdate(VEHICLE_POLLING_INTERVAL_SECONDS);
+      }, VEHICLE_POLLING_INTERVAL_SECONDS * 1000);
 
-    // Clean up intervals on component unmount
-    return () => {
-      clearInterval(vehiclesRefreshInterval);
-      clearInterval(countdownInterval);
+      countdownInterval = setInterval(() => {
+        setSecondsToNextUpdate((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
     };
-  }, []);
+
+    const stopVehiclePolling = () => {
+      if (vehiclesRefreshIntervalRef.current) {
+        clearInterval(vehiclesRefreshIntervalRef.current);
+        vehiclesRefreshIntervalRef.current = null;
+      }
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopVehiclePolling();
+      } else {
+        startVehiclePolling();
+      }
+    };
+
+    // Initial fetch and polling start
+    fetchWeeklyTimetable();
+    startVehiclePolling();
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Cleanup
+    return () => {
+      stopVehiclePolling();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [location.pathname]);
 
   if (weeklyTimetableLoading) {
     return (
