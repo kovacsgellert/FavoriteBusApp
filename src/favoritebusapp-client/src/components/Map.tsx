@@ -1,7 +1,6 @@
 import L from "leaflet";
 import { useEffect, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
-import type { TranzyVehicle } from "../models/TranzyVehicle";
 import { ActiveVehicleDto } from "../models/ActiveVehicleDto";
 
 const orangeBusIcon = new L.Icon({
@@ -27,7 +26,7 @@ interface MapProps {
   stops: string[];
 }
 
-export default function Map({ vehicles, stops }: MapProps) {
+export default function Map({ vehicles }: MapProps) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
