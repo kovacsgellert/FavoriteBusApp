@@ -6,11 +6,11 @@ import ErrorMessage from "../../components/ErrorMessage";
 import Footer from "../../components/Footer";
 
 const ROUTE_TYPES = [
-  { label: "BUS", value: "BUS", color: "bg-green-700 text-green-100" },
+  { label: "BUS", value: "BUS", color: "bg-yellow-700 text-yellow-100" },
   {
     label: "TROLLEY",
     value: "TROLLEY",
-    color: "bg-yellow-700 text-yellow-100",
+    color: "bg-green-700 text-green-100",
   },
   { label: "TRAM", value: "TRAM", color: "bg-purple-700 text-purple-100" },
 ];
@@ -30,7 +30,7 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
-      className={`px-4 py-1 rounded-full font-semibold shadow-md border-2 transition-all duration-150 mr-2 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+      className={`px-2 py-1 rounded-full font-semibold shadow-md border-2 transition-all duration-150 mr-2 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
         selected
           ? `${color} border-white/80 scale-105`
           : "bg-white/20 text-white border-white/30 hover:bg-white/30"
@@ -49,6 +49,7 @@ export default function Home() {
   const [selectedTypes, setSelectedTypes] = useState<string[]>(
     ROUTE_TYPES.map((rt) => rt.value)
   );
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -83,25 +84,27 @@ export default function Home() {
     );
   };
 
-  const filteredRoutes = routes.filter((route) =>
-    selectedTypes.includes(route.type)
-  );
+  const filteredRoutes = routes.filter((route) => {
+    const matchesType = selectedTypes.includes(route.type);
+    const searchLower = search.toLowerCase();
+    const matchesSearch =
+      route.name.toLowerCase().includes(searchLower) ||
+      route.longName.toLowerCase().includes(searchLower);
+    return matchesType && matchesSearch;
+  });
 
   if (loading) return <Loading />;
   if (error) return <ErrorMessage message={error} />;
 
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-br from-[#1a6347] via-[#2e3c7e] to-[#15162c] text-white">
-      <header className="z-10 flex flex-col items-center justify-center bg-white/10 py-8 shadow-lg backdrop-blur-md">
+      <header className="z-10 flex flex-col items-center justify-center bg-white/10 py-4 shadow-lg backdrop-blur-md">
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-center">
-          Favorite Bus Routes
+          CTP Routes
         </h1>
-        <p className="mt-2 text-blue-200 text-lg text-center max-w-2xl">
-          Select a route to view its daily timetable and live vehicles.
-        </p>
       </header>
-      <div className="container mx-auto flex-1 px-2 py-6 md:px-8 lg:px-16 flex flex-col">
-        <div className="flex flex-wrap items-center mb-4">
+      <div className="container mx-auto flex-1 px-1 py-3 sm:px-2 sm:py-6 md:px-8 lg:px-16 flex flex-col">
+        <div className="flex flex-row flex-wrap items-center mb-4 gap-1 md:gap-2">
           {ROUTE_TYPES.map((rt) => (
             <Chip
               key={rt.value}
@@ -111,23 +114,42 @@ export default function Home() {
               color={rt.color}
             />
           ))}
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search routes..."
+            className="ml-0.5 md:ml-2 px-2 py-0.5 sm:px-2 sm:py-1 rounded-lg border border-white/30 bg-white/10 text-white placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all flex-shrink-0"
+          />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-          {filteredRoutes.map((route) => (
-            <button
-              key={route.id}
-              onClick={() => navigate(`/t/${route.name}`)}
-              className="rounded-xl bg-white/10 hover:bg-white/20 shadow-md backdrop-blur-md p-3 flex flex-col items-start transition-all border border-transparent hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 min-h-[70px] min-w-0"
-              title={`Go to ${route.name}`}
-            >
-              <span className="text-lg font-bold text-green-300 mb-0.5">
-                {route.name}
-              </span>
-              <span className="text-base text-blue-100 font-medium">
-                {route.longName.replace(/\"/g, "").trim()}
-              </span>
-            </button>
-          ))}
+          {filteredRoutes.map((route) => {
+            const typeColor =
+              ROUTE_TYPES.find((rt) => rt.value === route.type)?.color ||
+              "text-green-300";
+            return (
+              <button
+                key={route.id}
+                onClick={() => navigate(`/t/${route.name}`)}
+                className="rounded-xl bg-white/10 hover:bg-white/20 shadow-md backdrop-blur-md p-3 flex flex-col items-start transition-all border border-transparent hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 min-h-[70px] min-w-0"
+                title={`Go to ${route.name}`}
+              >
+                <span
+                  className={`flex flex-wrap items-center gap-2 text-lg font-bold mb-0.5 px-2 py-0.5 w-full`}
+                >
+                  <span className={`rounded-3xl ${typeColor} px-2 py-0.5`}>
+                    {route.name}
+                  </span>
+                  <span className="block sm:hidden text-base font-medium text-blue-100 ml-2 whitespace-nowrap">
+                    {route.longName.replace(/\"/g, "").trim()}
+                  </span>
+                </span>
+                <span className="hidden sm:block text-base text-blue-100 font-medium">
+                  {route.longName.replace(/\"/g, "").trim()}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
       <Footer />
