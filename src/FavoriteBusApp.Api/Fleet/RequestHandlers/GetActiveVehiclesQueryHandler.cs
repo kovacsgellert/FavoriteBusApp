@@ -3,7 +3,6 @@ using FavoriteBusApp.Api.Fleet.Contracts;
 using FavoriteBusApp.Api.Fleet.TranzyIntegration;
 using FavoriteBusApp.Api.Fleet.TranzyIntegration.Models;
 using MediatR;
-using StackExchange.Redis;
 
 namespace FavoriteBusApp.Api.Fleet.RequestHandlers;
 
@@ -11,15 +10,12 @@ public class GetActiveVehiclesQueryHandler
     : IRequestHandler<GetActiveVehiclesQuery, OperationResult<ActiveVehicleDto[]>>
 {
     private readonly ITranzyClient _tranzyClient;
-    private readonly IConnectionMultiplexer _redisClient;
+    private readonly ICache _cache;
 
-    public GetActiveVehiclesQueryHandler(
-        ITranzyClient tranzyClient,
-        IConnectionMultiplexer redisClient
-    )
+    public GetActiveVehiclesQueryHandler(ITranzyClient tranzyClient, ICache cache)
     {
         _tranzyClient = tranzyClient;
-        _redisClient = redisClient;
+        _cache = cache;
     }
 
     public async Task<OperationResult<ActiveVehicleDto[]>> Handle(
@@ -29,16 +25,12 @@ public class GetActiveVehiclesQueryHandler
     {
         request.RouteName = request.RouteName.Trim().ToUpperInvariant();
 
-        var redisDb = _redisClient.GetDatabase();
-        var cachedJson = (
-            await redisDb.StringGetAsync($"active-vehicles:{request.RouteName}")
-        ).ToString();
+        var cachedVehicles = await _cache.GetAsync<ActiveVehicleDto[]>(
+            $"active-vehicles:{request.RouteName}"
+        );
 
-        if (!string.IsNullOrEmpty(cachedJson))
-        {
-            var cachedVehicles = JsonSerializer.Deserialize<ActiveVehicleDto[]>(cachedJson)!;
+        if (cachedVehicles != null)
             return OperationResult<ActiveVehicleDto[]>.Ok(cachedVehicles);
-        }
 
         var routes = await GetRoutes();
         var trips = await GetTrips();
@@ -67,9 +59,9 @@ public class GetActiveVehiclesQueryHandler
                 .Select(v => CreateActiveVehicleDto(v, routeName, routeTrips))
                 .ToArray();
 
-            await redisDb.StringSetAsync(
+            await _cache.SetAsync(
                 $"active-vehicles:{routeName}",
-                JsonSerializer.Serialize(vehicleDtos),
+                vehicleDtos,
                 TimeSpan.FromSeconds(19) // clients are polling every 20 seconds
             );
 
@@ -82,47 +74,23 @@ public class GetActiveVehiclesQueryHandler
 
     private async Task<TranzyRoute[]> GetRoutes()
     {
-        var cacheKey = $"routes";
-        var redisDb = _redisClient.GetDatabase();
-        var cachedJson = (await redisDb.StringGetAsync(cacheKey)).ToString();
-
-        if (!string.IsNullOrEmpty(cachedJson))
-        {
-            var cachedRoutes = JsonSerializer.Deserialize<TranzyRoute[]>(cachedJson)!;
+        var cachedRoutes = await _cache.GetAsync<TranzyRoute[]>("routes");
+        if (cachedRoutes != null)
             return cachedRoutes;
-        }
 
         var routes = await _tranzyClient.GetRoutes();
-
-        await redisDb.StringSetAsync(
-            cacheKey,
-            JsonSerializer.Serialize(routes),
-            TimeSpan.FromDays(7)
-        );
-
+        await _cache.SetAsync("routes", routes, TimeSpan.FromDays(7));
         return routes;
     }
 
     private async Task<TranzyTrip[]> GetTrips()
     {
-        var cacheKey = $"trips";
-        var redisDb = _redisClient.GetDatabase();
-        var cachedJson = (await redisDb.StringGetAsync(cacheKey)).ToString();
-
-        if (!string.IsNullOrEmpty(cachedJson))
-        {
-            var cachedTrips = JsonSerializer.Deserialize<TranzyTrip[]>(cachedJson)!;
+        var cachedTrips = await _cache.GetAsync<TranzyTrip[]>("trips");
+        if (cachedTrips != null)
             return cachedTrips;
-        }
 
         var trips = await _tranzyClient.GetTrips();
-
-        await redisDb.StringSetAsync(
-            cacheKey,
-            JsonSerializer.Serialize(trips),
-            TimeSpan.FromDays(7)
-        );
-
+        await _cache.SetAsync("trips", trips, TimeSpan.FromDays(7));
         return trips;
     }
 

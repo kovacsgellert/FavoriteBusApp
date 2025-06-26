@@ -2,7 +2,7 @@ export default function Footer() {
   return (
     <footer className="mt-auto py-3 text-center bg-white/5 shadow-inner backdrop-blur-md">
       <span className="inline-flex items-center font-semibold tracking-wide text-gray-300 text-base">
-        © 2025 Gellért Kovács
+        © 2025 Kovács Gellért
         <a
           href="https://github.com/kovacsgellert/FavoriteBusApp"
           target="_blank"

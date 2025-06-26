@@ -1,3 +1,4 @@
+using FavoriteBusApp.Api.Common;
 using FavoriteBusApp.Api.Fleet.Contracts;
 using FavoriteBusApp.Api.Fleet.TranzyIntegration;
 using FavoriteBusApp.Api.Timetables;
@@ -30,6 +31,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 builder.AddRedisClient(connectionName: "redis");
 
+builder.Services.AddScoped<ICache, RedisCache>();
+
 builder.Services.AddScoped<ICtpCsvParser, CtpCsvParser>();
 builder.Services.AddScoped<ICtpCsvClient, CtpCsvClient>().AddHttpClient();
 
@@ -51,35 +54,50 @@ else
 }
 
 app.MapGet(
-        "/api/timetables/{routeName}",
-        async (string routeName, IMediator mediator) =>
-        {
-            var result = await mediator.Send(new GetWeeklyTimetableQuery { RouteName = routeName });
-            return result.ToResult();
-        }
-    )
-    .WithName("GetWeeklyTimetable");
+    "/api/timetables/{routeName}",
+    async (string routeName, IMediator mediator) =>
+    {
+        var result = await mediator.Send(new GetWeeklyTimetableQuery { RouteName = routeName });
+        return result.ToResult();
+    }
+);
 
 app.MapGet(
-        "/api/timetables/{routeName}/refresh",
-        async (string routeName, bool forceRefresh, IMediator mediator) =>
-        {
-            var result = await mediator.Send(
-                new GetWeeklyTimetableQuery { RouteName = routeName, ForceRefresh = true }
-            );
-            return result.ToResult();
-        }
-    )
-    .WithName("RefreshWeeklyTimetable");
+    "/api/timetables/{routeName}/refresh",
+    async (string routeName, bool forceRefresh, IMediator mediator) =>
+    {
+        var result = await mediator.Send(
+            new GetWeeklyTimetableQuery { RouteName = routeName, ForceRefresh = true }
+        );
+        return result.ToResult();
+    }
+);
 
 app.MapGet(
-        "/api/vehicles/{routeName}",
-        async (string routeName, IMediator mediator) =>
-        {
-            var result = await mediator.Send(new GetActiveVehiclesQuery { RouteName = routeName });
-            return result.ToResult();
-        }
-    )
-    .WithName("GetActiveVehicles");
+    "/api/vehicles/{routeName}",
+    async (string routeName, IMediator mediator) =>
+    {
+        var result = await mediator.Send(new GetActiveVehiclesQuery { RouteName = routeName });
+        return result.ToResult();
+    }
+);
+
+app.MapGet(
+    "/api/routes",
+    async (IMediator mediator) =>
+    {
+        var result = await mediator.Send(new GetRoutesQuery());
+        return result.ToResult();
+    }
+);
+
+app.MapGet(
+    "/api/routes/refresh",
+    async (IMediator mediator) =>
+    {
+        var result = await mediator.Send(new GetRoutesQuery { ForceRefresh = true });
+        return result.ToResult();
+    }
+);
 
 app.Run();
