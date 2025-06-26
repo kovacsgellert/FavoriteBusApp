@@ -58,9 +58,9 @@ export default function Timetable({ header, values, timeNow }: TimetableProps) {
                 }`}
               >
                 <td
-                  className={`px-6 py-3 ${getTextColor(
+                  className={`px-6 py-1 flex items-center justify-center gap-2 md:py-2 ${getTextColor(
                     value
-                  )} flex items-center justify-center gap-2`}
+                  )}`}
                 >
                   <span>{value}</span>
                   {value === nextDeparture && (

@@ -7,6 +7,8 @@ import "leaflet/dist/leaflet.css";
 import { useLocation, Link } from "react-router-dom";
 import { ActiveVehicleDto } from "../../models/ActiveVehicleDto";
 import Footer from "../../components/Footer";
+import Loading from "../../components/Loading";
+import ErrorMessage from "../../components/ErrorMessage";
 
 export default function DailyTimetable() {
   const VEHICLE_POLLING_INTERVAL_SECONDS = 20;
@@ -59,7 +61,7 @@ export default function DailyTimetable() {
         "/api/vehicles/" + getRouteNameFromLocationPath()
       );
       if (!response.ok) {
-        throw new Error("Failed to fetch vehicles. Status: " + response.status);
+        throw Error("Failed to fetch vehicles. Status: " + response.status);
       }
       const data = await response.json();
       setVehicles(data.data);
@@ -138,39 +140,15 @@ export default function DailyTimetable() {
   }, [location.pathname]);
 
   if (weeklyTimetableLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-green-900 to-blue-900">
-        <div className="rounded-xl bg-white/10 px-8 py-6 shadow-xl backdrop-blur-md">
-          <span className="block animate-pulse text-lg font-semibold text-white">
-            Loading...
-          </span>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (weeklyTimetableError) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-red-900 to-pink-900">
-        <div className="rounded-xl bg-white/10 px-8 py-6 shadow-xl backdrop-blur-md">
-          <span className="block text-lg font-semibold text-white">
-            Error: {weeklyTimetableError}
-          </span>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={weeklyTimetableError} />;
   }
 
   if (!weeklyTimetable || weeklyTimetable.dailyTimetables.length === 0) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-        <div className="rounded-xl bg-white/10 px-8 py-6 shadow-xl backdrop-blur-md">
-          <span className="block text-lg font-semibold text-white">
-            No data available
-          </span>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message="No data available" />;
   }
 
   const todaysType = getTodaysType();

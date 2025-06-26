@@ -3,6 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import Timetable from "../../components/Timetable";
 import { CtpWeeklyTimetable } from "../../models/CtpWeeklyTimetable";
 import Footer from "../../components/Footer";
+import Loading from "../../components/Loading";
+import ErrorMessage from "../../components/ErrorMessage";
 
 export default function WeeklyTimetable() {
   const location = useLocation();
@@ -42,49 +44,21 @@ export default function WeeklyTimetable() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-green-900 to-blue-900">
-        <div className="rounded-xl bg-white/10 px-8 py-6 shadow-xl backdrop-blur-md">
-          <span className="block animate-pulse text-lg font-semibold text-white">
-            Loading...
-          </span>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (error) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-red-900 to-pink-900">
-        <div className="rounded-xl bg-white/10 px-8 py-6 shadow-xl backdrop-blur-md">
-          <span className="block text-lg font-semibold text-white">
-            Error: {error}
-          </span>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={error} />;
   }
 
   if (!weeklyTimetable || weeklyTimetable.dailyTimetables.length === 0) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-        <div className="rounded-xl bg-white/10 px-8 py-6 shadow-xl backdrop-blur-md">
-          <span className="block text-lg font-semibold text-white">
-            No data available
-          </span>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message="No data available" />;
   }
 
   const getTimetableByType = (type: string) =>
     weeklyTimetable.dailyTimetables.find((t) => t.dayType === type);
 
-  const types = [
-    { key: "weekdays", label: "WEEKDAYS" },
-    { key: "saturday", label: "SATURDAY" },
-    { key: "sunday", label: "SUNDAY" },
-  ];
+  const timetableTypes = ["weekdays", "saturday", "sunday"];
 
   return (
     <main className="flex h-screen flex-col overflow-hidden bg-gradient-to-br from-[#1a6347] via-[#2e3c7e] to-[#15162c] text-white">
@@ -118,16 +92,16 @@ export default function WeeklyTimetable() {
         </h1>
       </header>
       <div className="container mx-auto flex flex-grow flex-col gap-1 overflow-hidden px-2 py-2 sm:px-0 sm:py-4 md:flex-row md:gap-2 md:px-0 lg:px-0">
-        {types.map(({ key, label }) => {
-          const timetable = getTimetableByType(key);
+        {timetableTypes.map((type) => {
+          const timetable = getTimetableByType(type);
           if (!timetable) return null;
           return (
             <section
-              key={key}
+              key={type}
               className="flex flex-1 w-full flex-col gap-2 min-w-0 min-h-0 bg-white/5 rounded-2xl shadow-md p-2 md:p-4"
             >
               <h2 className="text-lg font-bold text-center text-green-200 mb-1 tracking-wider">
-                {label}
+                {type.toUpperCase()}
               </h2>
               <div className="flex flex-row gap-2 min-h-0 flex-1 md:h-auto md:gap-4">
                 <div className="w-1/2 min-w-0 overflow-auto">
