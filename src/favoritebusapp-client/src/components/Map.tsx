@@ -2,6 +2,9 @@ import L from "leaflet";
 import { useEffect, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import { ActiveVehicleDto } from "../models/ActiveVehicleDto";
+import "leaflet/dist/leaflet.css";
+import "react-leaflet-markercluster/styles";
+import MarkerClusterGroup from "react-leaflet-markercluster";
 
 const orangeBusIcon = new L.Icon({
   iconUrl: "/bus-orange.png",
@@ -56,20 +59,22 @@ export default function Map({ vehicles }: MapProps) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {vehicles &&
-          vehicles.map((vehicle) => (
-            <Marker
-              key={vehicle.label}
-              position={[vehicle.latitude, vehicle.longitude]}
-              icon={getVehicleIcon(vehicle)}
-            >
-              <Popup>
-                From: {vehicle.fromStop} <br />
-                To: {vehicle.toStop} <br />
-                Speed: {vehicle.speed} km/h <br />
-              </Popup>
-            </Marker>
-          ))}
+        <MarkerClusterGroup maxClusterRadius={20}>
+          {vehicles &&
+            vehicles.map((vehicle) => (
+              <Marker
+                key={vehicle.label}
+                position={[vehicle.latitude, vehicle.longitude]}
+                icon={getVehicleIcon(vehicle)}
+              >
+                <Popup>
+                  From: {vehicle.fromStop} <br />
+                  To: {vehicle.toStop} <br />
+                  Speed: {vehicle.speed} km/h <br />
+                </Popup>
+              </Marker>
+            ))}
+        </MarkerClusterGroup>
       </MapContainer>
     </div>
   );

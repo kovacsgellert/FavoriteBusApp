@@ -3,12 +3,12 @@ import Timetable from "../../components/Timetable";
 import Map from "../../components/Map";
 import { CtpDailyTimetable } from "../../models/CtpDailyTimetable";
 import { CtpWeeklyTimetable } from "../../models/CtpWeeklyTimetable";
-import "leaflet/dist/leaflet.css";
 import { useLocation, Link } from "react-router-dom";
 import { ActiveVehicleDto } from "../../models/ActiveVehicleDto";
 import Footer from "../../components/Footer";
 import Loading from "../../components/Loading";
 import ErrorMessage from "../../components/ErrorMessage";
+import Countdown from "../../components/Countdown";
 
 export default function DailyTimetable() {
   const VEHICLE_POLLING_INTERVAL_SECONDS = 20;
@@ -23,9 +23,6 @@ export default function DailyTimetable() {
 
   const [vehicles, setVehicles] = useState<ActiveVehicleDto[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  const [secondsToNextUpdate, setSecondsToNextUpdate] = useState(
-    VEHICLE_POLLING_INTERVAL_SECONDS
-  );
 
   const vehiclesRefreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -91,30 +88,23 @@ export default function DailyTimetable() {
 
   // Polling logic with visibility handling
   useEffect(() => {
-    let countdownInterval: NodeJS.Timeout | null = null;
-
     const startVehiclePolling = () => {
       fetchVehicles();
-      setSecondsToNextUpdate(VEHICLE_POLLING_INTERVAL_SECONDS);
+
+      // Clear previous intervals before starting new ones
+      if (vehiclesRefreshIntervalRef.current) {
+        clearInterval(vehiclesRefreshIntervalRef.current);
+      }
 
       vehiclesRefreshIntervalRef.current = setInterval(() => {
         fetchVehicles();
-        setSecondsToNextUpdate(VEHICLE_POLLING_INTERVAL_SECONDS);
       }, VEHICLE_POLLING_INTERVAL_SECONDS * 1000);
-
-      countdownInterval = setInterval(() => {
-        setSecondsToNextUpdate((prev) => (prev > 0 ? prev - 1 : 0));
-      }, 1000);
     };
 
     const stopVehiclePolling = () => {
       if (vehiclesRefreshIntervalRef.current) {
         clearInterval(vehiclesRefreshIntervalRef.current);
         vehiclesRefreshIntervalRef.current = null;
-      }
-      if (countdownInterval) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
       }
     };
 
@@ -195,7 +185,11 @@ export default function DailyTimetable() {
             {lastUpdated && (
               <span>
                 Last updated: {lastUpdated.toLocaleTimeString()} &nbsp;|
-                &nbsp;Next update in {secondsToNextUpdate}s
+                &nbsp;Next update in{" "}
+                <Countdown
+                  seconds={VEHICLE_POLLING_INTERVAL_SECONDS}
+                  lastUpdated={lastUpdated}
+                />
               </span>
             )}
           </span>
