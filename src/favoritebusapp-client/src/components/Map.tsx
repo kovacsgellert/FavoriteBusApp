@@ -21,17 +21,43 @@ const purpleBusIcon = new L.Icon({
   iconSize: [28, 28],
 });
 
+const greenUserIcon = new L.Icon({
+  iconUrl: "/user-green.png",
+  iconSize: [28, 28],
+});
+
 interface MapProps {
   vehicles: ActiveVehicleDto[];
   stops: string[];
 }
 
+interface UserPosition {
+  latitude: number;
+  longitude: number;
+}
+
 export default function Map({ vehicles }: MapProps) {
   const [isMounted, setIsMounted] = useState(false);
+  const clujCenter = { latitude: 46.7694, longitude: 23.5909 }; // Default position set to Cluj-Napoca, Romania
+  const [userPosition, setUserPosition] = useState<UserPosition>(clujCenter);
 
   useEffect(() => {
     setIsMounted(true);
     return () => setIsMounted(false);
+  }, []);
+
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserPosition({ latitude, longitude });
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+        }
+      );
+    }
   }, []);
 
   const getVehicleIcon = (vehicle: ActiveVehicleDto) => {
@@ -42,14 +68,14 @@ export default function Map({ vehicles }: MapProps) {
 
   if (!isMounted) {
     return (
-      <div className="h-full w-full animate-pulse rounded-2xl bg-gray-800/60 shadow-lg"></div>
+      <div className="h-full w-full rounded-2xl bg-gray-800/60 shadow-lg"></div>
     );
   }
 
   return (
     <div className="h-full w-full rounded-2xl bg-white/10 shadow-lg backdrop-blur-md overflow-hidden">
       <MapContainer
-        center={[46.7694, 23.5909]}
+        center={[userPosition.latitude, userPosition.longitude]}
         zoom={13}
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%" }}
@@ -59,6 +85,15 @@ export default function Map({ vehicles }: MapProps) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        {userPosition.latitude != clujCenter.latitude &&
+          userPosition.longitude != clujCenter.longitude && (
+            <Marker
+              position={[userPosition.latitude, userPosition.longitude]}
+              icon={greenUserIcon}
+            >
+              <Popup>This is you. (Incredible!)</Popup>
+            </Marker>
+          )}
         <MarkerClusterGroup maxClusterRadius={20}>
           {vehicles &&
             vehicles.map((vehicle) => (
