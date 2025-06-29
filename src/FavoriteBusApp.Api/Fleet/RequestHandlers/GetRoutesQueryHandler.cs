@@ -25,14 +25,18 @@ public class GetRoutesQueryHandler : IRequestHandler<GetRoutesQuery, OperationRe
         var cachedRoutes = await _cache.GetAsync<TranzyRoute[]>("routes");
         if (cachedRoutes != null && !request.ForceRefresh)
             return OperationResult<RouteDto[]>.Ok(
-                cachedRoutes.Select(CreateRouteDto).OrderBy(r => r.Name).ToArray()
+                cachedRoutes
+                    .Where(ShouldReturnRoute)
+                    .Select(CreateRouteDto)
+                    .OrderBy(r => r.Name)
+                    .ToArray()
             );
 
         var routes = await _tranzyClient.GetRoutes();
         await _cache.SetAsync("routes", routes, TimeSpan.FromDays(7));
 
         return OperationResult<RouteDto[]>.Ok(
-            routes.Select(CreateRouteDto).OrderBy(r => r.Name).ToArray()
+            routes.Where(ShouldReturnRoute).Select(CreateRouteDto).OrderBy(r => r.Name).ToArray()
         );
     }
 
@@ -51,5 +55,12 @@ public class GetRoutesQueryHandler : IRequestHandler<GetRoutesQuery, OperationRe
                 _ => "UNKNOWN",
             },
         };
+    }
+
+    private static bool ShouldReturnRoute(TranzyRoute route)
+    {
+        return !route.RouteShortName.Contains("te", StringComparison.InvariantCultureIgnoreCase)
+            && !route.RouteLongName.StartsWith("te", StringComparison.InvariantCultureIgnoreCase)
+            && route.RouteShortName.ToLowerInvariant() is not ("30u" or "101a");
     }
 }

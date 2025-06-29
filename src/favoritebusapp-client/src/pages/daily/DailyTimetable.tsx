@@ -145,6 +145,14 @@ export default function DailyTimetable() {
   const todaysTimetable = weeklyTimetable.dailyTimetables.find(
     (timetable: CtpDailyTimetable) => timetable.dayType === todaysType
   )!;
+  
+  if (!todaysTimetable) {
+    return (
+      <ErrorMessage
+        message={`No timetable available for today. Route ${getRouteNameFromLocationPath()} is probably not in service on ${todaysType}.`}
+      />
+    );
+  }
 
   return (
     <main className="flex h-screen flex-col overflow-hidden bg-gradient-to-br from-[#1a6347] via-[#2e3c7e] to-[#15162c] text-white">

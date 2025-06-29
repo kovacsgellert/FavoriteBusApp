@@ -34,22 +34,33 @@ public class GetWeeklyTimetableQueryHandler
             request.RouteName,
             DayTypeConstants.Weekdays
         );
-
         var saturdayTimetable = await _csvClient.GetDailyTimetable(
             request.RouteName,
             DayTypeConstants.Saturday
         );
-
         var sundayTimetable = await _csvClient.GetDailyTimetable(
             request.RouteName,
             DayTypeConstants.Sunday
         );
 
+        List<CtpDailyTimetable> dailyTimetables = [];
+        if (weekdaysTimetable != null)
+            dailyTimetables.Add(weekdaysTimetable);
+        if (saturdayTimetable != null)
+            dailyTimetables.Add(saturdayTimetable);
+        if (sundayTimetable != null)
+            dailyTimetables.Add(sundayTimetable);
+
+        if (dailyTimetables.Count == 0)
+            return OperationResult<CtpWeeklyTimeTable>.Error(
+                $"No timetables found for route: {request.RouteName}"
+            );
+
         var weeklyTimetable = new CtpWeeklyTimeTable
         {
-            RouteName = weekdaysTimetable.RouteName,
-            RouteLongName = weekdaysTimetable.RouteLongName,
-            DailyTimetables = [weekdaysTimetable, saturdayTimetable, sundayTimetable],
+            RouteName = dailyTimetables[0].RouteName,
+            RouteLongName = dailyTimetables[0].RouteLongName,
+            DailyTimetables = dailyTimetables.ToArray(),
         };
 
         await _cache.SetAsync(cacheKey, weeklyTimetable, TimeSpan.FromDays(7));

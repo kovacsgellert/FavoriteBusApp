@@ -4,7 +4,7 @@ namespace FavoriteBusApp.Api.Timetables.CtpIntegration;
 
 public interface ICtpCsvClient
 {
-    Task<CtpDailyTimetable> GetDailyTimetable(string routeName, string dayType);
+    Task<CtpDailyTimetable?> GetDailyTimetable(string routeName, string dayType);
 }
 
 public class CtpCsvClient : ICtpCsvClient
@@ -28,7 +28,7 @@ public class CtpCsvClient : ICtpCsvClient
         _csvParser = csvParser;
     }
 
-    public async Task<CtpDailyTimetable> GetDailyTimetable(string routeName, string dayType)
+    public async Task<CtpDailyTimetable?> GetDailyTimetable(string routeName, string dayType)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(routeName, nameof(routeName));
         ArgumentException.ThrowIfNullOrWhiteSpace(dayType, nameof(dayType));
@@ -36,9 +36,17 @@ public class CtpCsvClient : ICtpCsvClient
         if (!_urlDayTypeMap.ContainsKey(dayType))
             throw new ArgumentException($"Invalid day type: {dayType}", nameof(dayType));
 
-        var content = await GetCsvContent(routeName, dayType);
-        var timetable = _csvParser.ParseCsv(routeName, content);
+        string content;
+        try
+        {
+            content = await GetCsvContent(routeName, dayType);
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return null;
+        }
 
+        var timetable = _csvParser.ParseCsv(routeName, content);
         return timetable;
     }
 

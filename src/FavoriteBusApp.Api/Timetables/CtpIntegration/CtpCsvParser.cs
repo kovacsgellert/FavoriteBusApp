@@ -92,12 +92,12 @@ public class CtpCsvParser : ICtpCsvParser
         return parts.Length > 1 ? parts[1].Trim() : string.Empty;
     }
 
-    private static DateOnly ParseDate(string dateStr)
+    private static DateOnly? ParseDate(string dateStr)
     {
         dateStr = dateStr.Trim().Replace(',', '.');
 
         if (
-            !DateOnly.TryParseExact(
+            DateOnly.TryParseExact(
                 dateStr,
                 "dd.MM.yyyy",
                 CultureInfo.InvariantCulture,
@@ -106,11 +106,9 @@ public class CtpCsvParser : ICtpCsvParser
             )
         )
         {
-            throw new ArgumentException(
-                $"Invalid date format: {dateStr}. Expected format is DD.MM.YYYY."
-            );
+            return date;
         }
 
-        return date;
+        return null;
     }
 }
