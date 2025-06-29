@@ -6,36 +6,49 @@ import ErrorMessage from "../../components/ErrorMessage";
 import Footer from "../../components/Footer";
 
 const ROUTE_TYPES = [
-  { label: "BUS", value: "BUS", color: "bg-yellow-700 text-yellow-100" },
+  {
+    label: "BUS",
+    value: "BUS",
+    selectedColor: "bg-yellow-700 text-yellow-100",
+    unselectedColor: "bg-yellow-100 text-yellow-700",
+  },
   {
     label: "TROLLEY",
     value: "TROLLEY",
-    color: "bg-green-700 text-green-100",
+    selectedColor: "bg-green-700 text-green-100",
+    unselectedColor: "bg-green-100 text-green-700",
   },
-  { label: "TRAM", value: "TRAM", color: "bg-purple-700 text-purple-100" },
+  {
+    label: "TRAM",
+    value: "TRAM",
+    selectedColor: "bg-purple-700 text-purple-100",
+    unselectedColor: "bg-purple-100 text-purple-700",
+  },
 ];
 
 function Chip({
   label,
   selected,
   onClick,
-  color,
+  selectedColor,
+  unselectedColor,
 }: {
   label: string;
   selected: boolean;
   onClick: () => void;
-  color: string;
+  selectedColor: string;
+  unselectedColor: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`px-2 py-1 rounded-full font-semibold shadow-md border-2 transition-all duration-150 mr-2 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+      className={`px-1.5 py-0.5 rounded-full text-sm font-semibold shadow-md border-2 transition-all duration-150 mr-1 mb-1 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
         selected
-          ? `${color} border-white/80 scale-105`
-          : "bg-white/20 text-white border-white/30 hover:bg-white/30"
+          ? `${selectedColor} border-white/80 scale-105`
+          : `${unselectedColor} border-white/30 hover:brightness-110`
       }`}
-      style={{ minWidth: 80 }}
+      style={{ minWidth: 60 }}
     >
       {label}
     </button>
@@ -46,9 +59,8 @@ export default function Home() {
   const [routes, setRoutes] = useState<RouteDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(
-    ROUTE_TYPES.map((rt) => rt.value)
-  );
+  // By default, no chip is selected
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
@@ -76,16 +88,14 @@ export default function Home() {
 
   const toggleType = (type: string) => {
     setSelectedTypes((prev) =>
-      prev.includes(type)
-        ? prev.length === 1
-          ? prev // Prevent unselecting all
-          : prev.filter((t) => t !== type)
-        : [...prev, type]
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
     );
   };
 
+  // If no chip is selected, show all routes
   const filteredRoutes = routes.filter((route) => {
-    const matchesType = selectedTypes.includes(route.type);
+    const matchesType =
+      selectedTypes.length === 0 || selectedTypes.includes(route.type);
     const searchLower = search.toLowerCase();
     const matchesSearch =
       route.name.toLowerCase().includes(searchLower) ||
@@ -99,19 +109,29 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-br from-[#1a6347] via-[#2e3c7e] to-[#15162c] text-white">
       <header className="z-10 flex flex-col items-center justify-center bg-white/10 py-4 shadow-lg backdrop-blur-md">
-        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-center">
-          CTP Routes
-        </h1>
+        <div className="flex flex-row items-center justify-center gap-3">
+          <span className="bg-white/80 rounded-full p-2 flex items-center justify-center shadow">
+            <img
+              src="bus-purple.png"
+              alt="Logo"
+              className="h-6 w-6 md:h-8 md:w-8 object-contain"
+            />
+          </span>
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-center m-0">
+            Favorite Bus App
+          </h1>
+        </div>
       </header>
       <div className="container mx-auto flex-1 px-1 py-3 sm:px-2 sm:py-6 md:px-8 lg:px-16 flex flex-col">
-        <div className="flex flex-row flex-wrap items-center mb-4 gap-1 md:gap-2">
+        <div className="flex flex-row flex-wrap items-center justify-center mb-4 gap-1 md:gap-2">
           {ROUTE_TYPES.map((rt) => (
             <Chip
               key={rt.value}
               label={rt.label}
               selected={selectedTypes.includes(rt.value)}
               onClick={() => toggleType(rt.value)}
-              color={rt.color}
+              selectedColor={rt.selectedColor}
+              unselectedColor={rt.unselectedColor}
             />
           ))}
           <input
@@ -124,9 +144,10 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
           {filteredRoutes.map((route) => {
-            const typeColor =
-              ROUTE_TYPES.find((rt) => rt.value === route.type)?.color ||
-              "text-green-300";
+            const typeColors = ROUTE_TYPES.find(
+              (rt) => rt.value === route.type
+            );
+            const typeColor = typeColors?.selectedColor || "text-green-300";
             return (
               <button
                 key={route.id}
