@@ -1,6 +1,6 @@
 import L from "leaflet";
 import { useEffect, useState } from "react";
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import { ActiveVehicleDto } from "../models/ActiveVehicleDto";
 import "leaflet/dist/leaflet.css";
 import "react-leaflet-markercluster/styles";
@@ -34,6 +34,29 @@ interface MapProps {
 interface UserPosition {
   latitude: number;
   longitude: number;
+}
+
+function JumpToUserPositionButton({
+  userPosition,
+}: {
+  userPosition: UserPosition;
+}) {
+  const map = useMap();
+  return (
+    <button
+      className="absolute top-4 right-4 z-[1000] bg-green-700 text-white px-3 py-2 rounded-lg shadow hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
+      onClick={() => {
+        map.setView(
+          [userPosition.latitude, userPosition.longitude],
+          map.getZoom()
+        );
+      }}
+      title="Center map to your location"
+      style={{ pointerEvents: "auto" }}
+    >
+      Jump to me
+    </button>
+  );
 }
 
 export default function Map({ vehicles }: MapProps) {
@@ -73,7 +96,7 @@ export default function Map({ vehicles }: MapProps) {
   }
 
   return (
-    <div className="h-full w-full rounded-2xl bg-white/10 shadow-lg backdrop-blur-md overflow-hidden">
+    <div className="relative h-full w-full rounded-2xl bg-white/10 shadow-lg backdrop-blur-md overflow-hidden">
       <MapContainer
         center={[userPosition.latitude, userPosition.longitude]}
         zoom={13}
@@ -94,6 +117,7 @@ export default function Map({ vehicles }: MapProps) {
               <Popup>This is you. (Incredible!)</Popup>
             </Marker>
           )}
+        <JumpToUserPositionButton userPosition={userPosition} />
         <MarkerClusterGroup maxClusterRadius={20}>
           {vehicles &&
             vehicles.map((vehicle) => (
