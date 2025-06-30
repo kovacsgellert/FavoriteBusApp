@@ -157,7 +157,6 @@ export default function DailyTimetable() {
   return (
     <main className="flex h-screen flex-col overflow-hidden bg-gradient-to-br from-[#1a6347] via-[#2e3c7e] to-[#15162c] text-white">
       <header className="z-10 flex flex-row items-center justify-between bg-white/10 py-4 shadow-lg backdrop-blur-md md:px-6 lg:px-12">
-        {/* Center: Route name and long name, then day type */}
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="flex flex-row items-center justify-center gap-2">
             <span className="text-xl md:text-2xl lg:text-4xl font-extrabold tracking-tight text-center">
@@ -171,7 +170,6 @@ export default function DailyTimetable() {
             {todaysType.toUpperCase()}
           </div>
         </div>
-        {/* Right: Buttons */}
         <div className="flex flex-row items-center gap-2 ml-4 pr-2 sm:pr-0">
           <Link
             to="/"

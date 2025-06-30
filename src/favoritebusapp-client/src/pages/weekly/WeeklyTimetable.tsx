@@ -73,7 +73,6 @@ export default function WeeklyTimetable() {
             </span>
           </div>
         </div>
-        {/* Right: Buttons */}
         <div className="flex flex-row items-center gap-2 ml-4 pr-2 sm:pr-0">
           <Link
             to="/"
@@ -126,7 +125,7 @@ export default function WeeklyTimetable() {
               key={type}
               className="flex flex-1 w-full flex-col gap-2 min-w-0 min-h-0 bg-white/5 rounded-2xl shadow-md p-2 md:p-4"
             >
-              <h2 className="text-lg font-bold text-center text-green-200 mb-1 tracking-wider">
+              <h2 className="text-lg font-extrabold text-center text-green-300 mb-1 tracking-wider">
                 {type.toUpperCase()}
               </h2>
               <div className="flex flex-row gap-2 min-h-0 flex-1 md:h-auto md:gap-4">
