@@ -13,6 +13,11 @@ builder.AddServiceDefaults();
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
+var allowedOrigins =
+    builder
+        .Configuration.GetValue<string>("AllowedOrigins")
+        ?.Split(",", StringSplitOptions.RemoveEmptyEntries) ?? [];
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
@@ -20,6 +25,14 @@ builder.Services.AddCors(options =>
         builder =>
         {
             builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        }
+    );
+
+    options.AddPolicy(
+        "AllowProductionOrigins",
+        builder =>
+        {
+            builder.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader();
         }
     );
 });
@@ -50,7 +63,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseHttpsRedirection();
+    app.UseCors("AllowProductionOrigins");
 }
 
 app.MapGet(
