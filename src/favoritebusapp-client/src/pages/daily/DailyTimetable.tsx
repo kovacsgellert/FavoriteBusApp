@@ -12,6 +12,7 @@ import Countdown from "../../components/Countdown";
 
 export default function DailyTimetable() {
   const VEHICLE_POLLING_INTERVAL_SECONDS = 20;
+  const clujCenter = { latitude: 46.7694, longitude: 23.5909 };
   const location = useLocation();
 
   const [weeklyTimetable, setWeeklyTimetable] =
@@ -23,6 +24,10 @@ export default function DailyTimetable() {
 
   const [vehicles, setVehicles] = useState<ActiveVehicleDto[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [userPosition, setUserPosition] = useState<{
+    latitude: number;
+    longitude: number;
+  }>(clujCenter);
 
   const vehiclesRefreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -49,6 +54,20 @@ export default function DailyTimetable() {
       );
     } finally {
       setWeeklyTimetableLoading(false);
+    }
+  };
+
+  const fetchUserPosition = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserPosition({ latitude, longitude });
+        },
+        (_error) => {
+          console.warn("Geolocation error: ", _error);
+        }
+      );
     }
   };
 
@@ -90,6 +109,7 @@ export default function DailyTimetable() {
   useEffect(() => {
     const startVehiclePolling = () => {
       fetchVehicles();
+      fetchUserPosition();
 
       // Clear previous intervals before starting new ones
       if (vehiclesRefreshIntervalRef.current) {
@@ -98,6 +118,7 @@ export default function DailyTimetable() {
 
       vehiclesRefreshIntervalRef.current = setInterval(() => {
         fetchVehicles();
+        fetchUserPosition();
       }, VEHICLE_POLLING_INTERVAL_SECONDS * 1000);
     };
 
@@ -145,7 +166,7 @@ export default function DailyTimetable() {
   const todaysTimetable = weeklyTimetable.dailyTimetables.find(
     (timetable: CtpDailyTimetable) => timetable.dayType === todaysType
   )!;
-  
+
   if (!todaysTimetable) {
     return (
       <ErrorMessage
@@ -234,8 +255,8 @@ export default function DailyTimetable() {
           <Map
             vehicles={vehicles}
             stops={[todaysTimetable.inStopName, todaysTimetable.outStopName]}
+            userPosition={userPosition}
           />
-          {/* Overlay: Last updated and countdown in bottom right, above map controls */}
           <div
             className="absolute right-1 bottom-5 z-[1001] bg-black/70 text-white rounded-lg px-3 py-1 flex flex-row items-center gap-2 shadow-md text-xs md:text-sm pointer-events-none select-none"
             style={{ maxWidth: "90vw" }}

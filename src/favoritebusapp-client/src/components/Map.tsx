@@ -26,20 +26,18 @@ const greenUserIcon = new L.Icon({
   iconSize: [28, 28],
 });
 
+const clujCenter = { latitude: 46.7694, longitude: 23.5909 };
+
 interface MapProps {
   vehicles: ActiveVehicleDto[];
   stops: string[];
-}
-
-interface UserPosition {
-  latitude: number;
-  longitude: number;
+  userPosition: { latitude: number; longitude: number };
 }
 
 function JumpToUserPositionButton({
   userPosition,
 }: {
-  userPosition: UserPosition;
+  userPosition: { latitude: number; longitude: number };
 }) {
   const map = useMap();
   return (
@@ -59,28 +57,12 @@ function JumpToUserPositionButton({
   );
 }
 
-export default function Map({ vehicles }: MapProps) {
+export default function Map({ vehicles, userPosition }: MapProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const clujCenter = { latitude: 46.7694, longitude: 23.5909 }; // Default position set to Cluj-Napoca, Romania
-  const [userPosition, setUserPosition] = useState<UserPosition>(clujCenter);
 
   useEffect(() => {
     setIsMounted(true);
     return () => setIsMounted(false);
-  }, []);
-
-  useEffect(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserPosition({ latitude, longitude });
-        },
-        (error) => {
-          console.error("Geolocation error:", error);
-        }
-      );
-    }
   }, []);
 
   const getVehicleIcon = (vehicle: ActiveVehicleDto) => {
