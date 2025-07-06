@@ -1,26 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { RouteDto } from "../../models/RouteDto";
 import Loading from "../../components/Loading";
 import ErrorMessage from "../../components/ErrorMessage";
 import Footer from "../../components/Footer";
 import Chip from "../../components/Chip";
+import {
+  getFavoriteRoutes,
+  isRouteFavorite,
+  toggleFavoriteRoute,
+} from "./favoriteRouteUtils";
+import RouteListButton from "../../components/RouteListButton";
 
-const ROUTE_TYPES = [
+const ROUTE_TYPE_CHIP_PROPS = [
   {
-    label: "BUS",
     value: "BUS",
     selectedColor: "bg-yellow-700 text-yellow-100",
     unselectedColor: "bg-yellow-100 text-yellow-700",
   },
   {
-    label: "TROLLEY",
     value: "TROLLEY",
     selectedColor: "bg-green-700 text-green-100",
     unselectedColor: "bg-green-100 text-green-700",
   },
   {
-    label: "TRAM",
     value: "TRAM",
     selectedColor: "bg-purple-700 text-purple-100",
     unselectedColor: "bg-purple-100 text-purple-700",
@@ -28,13 +31,17 @@ const ROUTE_TYPES = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
   const [routes, setRoutes] = useState<RouteDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // By default, no chip is selected
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [search, setSearch] = useState("");
-  const navigate = useNavigate();
+  const [_, setFavoriteRoutes] = useState<string[]>(() => getFavoriteRoutes());
+
+  useEffect(() => {
+    setFavoriteRoutes(getFavoriteRoutes());
+  }, []);
 
   useEffect(() => {
     const fetchRoutes = async () => {
@@ -64,16 +71,26 @@ export default function Home() {
     );
   };
 
-  // If no chip is selected, show all routes
-  const filteredRoutes = routes.filter((route) => {
-    const matchesType =
-      selectedTypes.length === 0 || selectedTypes.includes(route.type);
-    const searchLower = search.toLowerCase();
-    const matchesSearch =
-      route.name.toLowerCase().includes(searchLower) ||
-      route.longName.toLowerCase().includes(searchLower);
-    return matchesType && matchesSearch;
-  });
+  const noFilterActive = selectedTypes.length === 0 && search.trim() === "";
+
+  const routesToShow = useMemo(() => {
+    if (noFilterActive) {
+      return [
+        ...routes.filter((route) => isRouteFavorite(route.name)),
+        ...routes.filter((route) => !isRouteFavorite(route.name)),
+      ];
+    } else {
+      return routes.filter((route) => {
+        const matchesType =
+          selectedTypes.length === 0 || selectedTypes.includes(route.type);
+        const searchLower = search.toLowerCase();
+        const matchesSearch =
+          route.name.toLowerCase().includes(searchLower) ||
+          route.longName.toLowerCase().includes(searchLower);
+        return matchesType && matchesSearch;
+      });
+    }
+  }, [routes, selectedTypes, search]);
 
   if (loading) return <Loading />;
   if (error) return <ErrorMessage message={error} />;
@@ -96,10 +113,10 @@ export default function Home() {
       </header>
       <div className="container mx-auto flex-1 px-1 py-3 sm:px-2 sm:py-6 md:px-8 lg:px-16 flex flex-col">
         <div className="flex flex-row flex-wrap items-center justify-center mb-4 gap-1 md:gap-2">
-          {ROUTE_TYPES.map((rt) => (
+          {ROUTE_TYPE_CHIP_PROPS.map((rt) => (
             <Chip
               key={rt.value}
-              label={rt.label}
+              label={rt.value}
               selected={selectedTypes.includes(rt.value)}
               onClick={() => toggleType(rt.value)}
               selectedColor={rt.selectedColor}
@@ -115,32 +132,18 @@ export default function Home() {
           />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-          {filteredRoutes.map((route) => {
-            const typeColors = ROUTE_TYPES.find(
-              (rt) => rt.value === route.type
-            );
-            const typeColor = typeColors?.selectedColor || "text-green-300";
+          {routesToShow.map((route) => {
             return (
-              <button
+              <RouteListButton
                 key={route.id}
-                onClick={() => navigate(`/t/${route.name}`)}
-                className="rounded-xl bg-white/10 hover:bg-white/20 shadow-md backdrop-blur-md p-3 flex flex-col items-start transition-all border border-transparent hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 min-h-[70px] min-w-0"
-                title={`Go to ${route.name}`}
-              >
-                <span
-                  className={`flex flex-wrap items-center gap-2 text-lg font-bold mb-0.5 px-2 py-0.5 w-full`}
-                >
-                  <span className={`rounded-3xl ${typeColor} px-2 py-0.5`}>
-                    {route.name}
-                  </span>
-                  <span className="block sm:hidden text-base font-medium text-blue-100 ml-2 whitespace-nowrap">
-                    {route.longName.replace(/\"/g, "").trim()}
-                  </span>
-                </span>
-                <span className="hidden sm:block text-base text-blue-100 font-medium">
-                  {route.longName.replace(/\"/g, "").trim()}
-                </span>
-              </button>
+                route={route}
+                isFavorite={isRouteFavorite(route.name)}
+                onLongPress={() => {
+                  const updated = toggleFavoriteRoute(route.name);
+                  setFavoriteRoutes([...updated]);
+                }}
+                onShortPress={() => navigate(`/t/${route.name}`)}
+              />
             );
           })}
         </div>
