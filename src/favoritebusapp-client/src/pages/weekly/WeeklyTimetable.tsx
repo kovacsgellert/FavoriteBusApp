@@ -62,8 +62,8 @@ export default function WeeklyTimetable() {
 
   return (
     <main className="flex h-screen flex-col overflow-hidden bg-gradient-to-br from-[#1a6347] via-[#2e3c7e] to-[#15162c] text-white">
-      <header className="z-10 flex flex-row items-center justify-between bg-white/10 py-4 shadow-lg backdrop-blur-md md:px-6 lg:px-12">
-        <div className="flex-1 flex flex-col items-center justify-center">
+      <header className="z-10 flex flex-col md:flex-row items-center justify-between bg-white/10 py-4 shadow-lg backdrop-blur-md md:px-6 lg:px-12">
+        <div className="flex-1 flex flex-col items-center justify-center w-full">
           <div className="flex flex-row items-center justify-center gap-2">
             <span className="text-xl md:text-2xl lg:text-4xl font-extrabold tracking-tight text-center">
               {weeklyTimetable.routeName}
@@ -73,7 +73,7 @@ export default function WeeklyTimetable() {
             </span>
           </div>
         </div>
-        <div className="flex flex-row items-center gap-2 ml-4 pr-2 sm:pr-0">
+        <div className="flex flex-row items-center gap-2 mt-2 w-full justify-center md:mt-0 md:ml-4 md:pr-2 md:w-auto md:justify-end">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded bg-white/20 hover:bg-white/40 text-blue-900 hover:text-blue-700 p-2 shadow-lg transition-all border-2 border-transparent hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
