@@ -9,7 +9,7 @@ services:
       PUID: ${APPUSER_PUID}  
       PGID: ${APPUSER_PGID}  
       TZ: ${TIME_ZONE_VALUE}
-      ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_ENVIRONMENT: "Prouction"
       OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
       OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
       OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
@@ -33,7 +33,7 @@ services:
         published: 3000
     environment:
       VITE_API_URL: "http://api:8080"
-      NODE_ENV: "development"
+      NODE_ENV: "production"
       BROWSER: "none"
       VITE_PORT: "3000"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://aspire-dashboard:18889"
