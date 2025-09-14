@@ -1,5 +1,7 @@
 using FavoriteBusApp.Api.Common;
 
+namespace FavoriteBusApp.Api;
+
 public static class OperationResultExtensions
 {
     public static IResult ToResult(this OperationResult result)

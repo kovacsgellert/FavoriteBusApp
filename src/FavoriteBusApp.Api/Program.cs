@@ -1,3 +1,4 @@
+using FavoriteBusApp.Api;
 using FavoriteBusApp.Api.Common;
 using FavoriteBusApp.Api.Fleet.Contracts;
 using FavoriteBusApp.Api.Fleet.TranzyIntegration;
