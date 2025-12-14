@@ -1,17 +1,17 @@
 namespace FavoriteBusApp.Api.Fleet.Contracts;
 
-public class ActiveVehicleDto
+public record ActiveVehicleDto
 {
-    public required string Label { get; set; }
-    public required string RouteName { get; set; }
-    public decimal? Latitude { get; set; }
-    public decimal? Longitude { get; set; }
-    public DateTime Timestamp { get; set; }
-    public int? Speed { get; set; }
-    public required string TripId { get; set; }
-    public required string FromStop { get; set; }
-    public required string ToStop { get; set; }
-    public required int VehicleType { get; set; }
-    public required string BikeAccessible { get; set; }
-    public required string WheelchairAccessible { get; set; }
+    public required string Label { get; init; }
+    public required string RouteName { get; init; }
+    public decimal? Latitude { get; init; }
+    public decimal? Longitude { get; init; }
+    public DateTime Timestamp { get; init; }
+    public int? Speed { get; init; }
+    public required string TripId { get; init; }
+    public required string FromStop { get; init; }
+    public required string ToStop { get; init; }
+    public required int VehicleType { get; init; }
+    public required string BikeAccessible { get; init; }
+    public required string WheelchairAccessible { get; init; }
 }

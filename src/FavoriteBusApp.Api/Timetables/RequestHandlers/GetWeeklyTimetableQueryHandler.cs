@@ -23,7 +23,7 @@ public class GetWeeklyTimetableQueryHandler
         CancellationToken cancellationToken
     )
     {
-        request.RouteName = request.RouteName.Trim().ToUpperInvariant();
+        request = request with { RouteName = request.RouteName.Trim().ToUpperInvariant() };
 
         var cacheKey = $"weekly_timetables:{request.RouteName}";
         var cachedTimetable = await _cache.GetAsync<CtpWeeklyTimeTable>(cacheKey);

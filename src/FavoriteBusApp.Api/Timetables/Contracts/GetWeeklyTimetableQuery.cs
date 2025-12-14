@@ -4,8 +4,8 @@ using MediatR;
 
 namespace FavoriteBusApp.Api.Timetables.Contracts;
 
-public class GetWeeklyTimetableQuery : IRequest<OperationResult<CtpWeeklyTimeTable>>
+public record GetWeeklyTimetableQuery : IRequest<OperationResult<CtpWeeklyTimeTable>>
 {
-    public required string RouteName { get; set; }
-    public bool ForceRefresh { get; set; } = false;
+    public required string RouteName { get; init; }
+    public bool ForceRefresh { get; init; } = false;
 }

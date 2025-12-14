@@ -1,7 +1,5 @@
 namespace FavoriteBusApp.Api.Timetables.CtpIntegration.Models;
 
-using FavoriteBusApp.Api.Timetables.CtpIntegration.Models;
-
 public class CtpWeeklyTimeTable
 {
     public required string RouteName { get; set; }

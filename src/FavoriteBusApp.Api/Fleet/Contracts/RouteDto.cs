@@ -1,9 +1,9 @@
 namespace FavoriteBusApp.Api.Common;
 
-public class RouteDto
+public record RouteDto
 {
-    public required int Id { get; set; }
-    public required string Name { get; set; }
-    public required string LongName { get; set; }
-    public required string Type { get; set; }
+    public required int Id { get; init; }
+    public required string Name { get; init; }
+    public required string LongName { get; init; }
+    public required string Type { get; init; }
 }

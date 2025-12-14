@@ -3,7 +3,7 @@ using MediatR;
 
 namespace FavoriteBusApp.Api.Fleet.Contracts;
 
-public class GetRoutesQuery : IRequest<OperationResult<RouteDto[]>>
+public record GetRoutesQuery : IRequest<OperationResult<RouteDto[]>>
 {
-    public bool ForceRefresh { get; set; } = false;
+    public bool ForceRefresh { get; init; } = false;
 }

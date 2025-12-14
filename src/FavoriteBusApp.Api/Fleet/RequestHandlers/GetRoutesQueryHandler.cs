@@ -9,12 +9,10 @@ namespace FavoriteBusApp.Api.Fleet.RequestHandlers;
 public class GetRoutesQueryHandler : IRequestHandler<GetRoutesQuery, OperationResult<RouteDto[]>>
 {
     private readonly ITranzyClient _tranzyClient;
-    private readonly ICache _cache;
 
-    public GetRoutesQueryHandler(ITranzyClient tranzyClient, ICache cache)
+    public GetRoutesQueryHandler(ITranzyClient tranzyClient)
     {
         _tranzyClient = tranzyClient;
-        _cache = cache;
     }
 
     public async Task<OperationResult<RouteDto[]>> Handle(
@@ -22,18 +20,7 @@ public class GetRoutesQueryHandler : IRequestHandler<GetRoutesQuery, OperationRe
         CancellationToken cancellationToken
     )
     {
-        var cachedRoutes = await _cache.GetAsync<TranzyRoute[]>("routes");
-        if (cachedRoutes != null && !request.ForceRefresh)
-            return OperationResult<RouteDto[]>.Ok(
-                cachedRoutes
-                    .Where(ShouldReturnRoute)
-                    .Select(CreateRouteDto)
-                    .OrderBy(r => r.Name)
-                    .ToArray()
-            );
-
         var routes = await _tranzyClient.GetRoutes();
-        await _cache.SetAsync("routes", routes, TimeSpan.FromDays(7));
 
         return OperationResult<RouteDto[]>.Ok(
             routes.Where(ShouldReturnRoute).Select(CreateRouteDto).OrderBy(r => r.Name).ToArray()
@@ -59,8 +46,22 @@ public class GetRoutesQueryHandler : IRequestHandler<GetRoutesQuery, OperationRe
 
     private static bool ShouldReturnRoute(TranzyRoute route)
     {
-        return !route.RouteShortName.Contains("te", StringComparison.InvariantCultureIgnoreCase)
-            && !route.RouteLongName.StartsWith("te", StringComparison.InvariantCultureIgnoreCase)
-            && route.RouteShortName.ToLowerInvariant() is not ("30u" or "101a");
+        var upperCaseRouteName = route.RouteShortName.ToUpperInvariant();
+        var upperCaseRouteLongName = route.RouteLongName.ToUpperInvariant();
+
+        // show Untold special routes only in August
+        if (!IsUntoldSeason() && upperCaseRouteName is "30U" or "101A")
+            return false;
+
+        // ignore routes reserved for pupils (Transport Elevi)
+        if (upperCaseRouteName.Contains("TE") || upperCaseRouteLongName.StartsWith("TE"))
+            return false;
+
+        return true;
+    }
+
+    private static bool IsUntoldSeason()
+    {
+        return DateTime.UtcNow.Month == 8;
     }
 }

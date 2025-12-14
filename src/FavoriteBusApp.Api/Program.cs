@@ -51,7 +51,8 @@ builder.Services.AddScoped<ICtpCsvParser, CtpCsvParser>();
 builder.Services.AddScoped<ICtpCsvClient, CtpCsvClient>().AddHttpClient();
 
 builder.Services.Configure<TranzyOptions>(builder.Configuration.GetSection("Tranzy"));
-builder.Services.AddScoped<ITranzyClient, TranzyClient>().AddHttpClient();
+builder.Services.AddKeyedScoped<ITranzyClient, TranzyClient>("TranzyClient").AddHttpClient();
+builder.Services.AddScoped<ITranzyClient, TranzyClientCache>();
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
 

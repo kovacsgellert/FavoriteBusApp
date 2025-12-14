@@ -3,13 +3,6 @@ using Microsoft.Extensions.Options;
 
 namespace FavoriteBusApp.Api.Fleet.TranzyIntegration;
 
-public interface ITranzyClient
-{
-    Task<TranzyVehicle[]> GetVehicles();
-    Task<TranzyRoute[]> GetRoutes();
-    Task<TranzyTrip[]> GetTrips();
-}
-
 public class TranzyClient : ITranzyClient
 {
     private readonly HttpClient _httpClient;
