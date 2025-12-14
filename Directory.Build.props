@@ -1,8 +1,7 @@
 <Project>
     <PropertyGroup>
-        <!-- Enable nullable reference types for all projects in the solution -->
         <Nullable>enable</Nullable>
-        <!-- Other common properties you might want to set solution-wide -->
+        <TargetFramework>net10.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
