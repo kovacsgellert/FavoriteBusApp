@@ -1,0 +1,5 @@
+{
+  "appHost": {
+    "path": "src/FavoriteBusApp.AppHost/FavoriteBusApp.AppHost.csproj"
+  }
+}

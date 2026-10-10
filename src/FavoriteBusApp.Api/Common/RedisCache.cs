@@ -33,7 +33,8 @@ public class RedisCache : ICache
     {
         var db = _redisClient.GetDatabase();
         var jsonValue = JsonSerializer.Serialize(value);
-        await db.StringSetAsync(key, jsonValue, expiration);
+        // default(Expiration) means no expiration, matching the old TimeSpan? overload behavior
+        await db.StringSetAsync(key, jsonValue, expiration ?? default(Expiration));
     }
 
     public async Task RemoveAsync(string key)

@@ -1,18 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <Sdk Name="Aspire.AppHost.Sdk" Version="13.0.2" />
+    <Sdk Name="Aspire.AppHost.Sdk" Version="13.6.1" />
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <IsAspireHost>true</IsAspireHost>
         <UserSecretsId>3d1d84f9-5e9a-4f1d-8cbd-701b63222549</UserSecretsId>
+        <NoWarn>$(NoWarn);ASPIRECOMPUTE003;ASPIREPIPELINES003</NoWarn>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Aspire.Hosting.AppHost" Version="13.0.2" />
-        <PackageReference Include="Aspire.Hosting.NodeJS" Version="9.5.2" />
-        <PackageReference Include="Aspire.Hosting.Redis" Version="13.0.2" />
-        <PackageReference
-            Include="CommunityToolkit.Aspire.Hosting.NodeJS.Extensions"
-            Version="9.9.0"
-        />
+        <PackageReference Include="Aspire.Hosting.AppHost" Version="13.6.1" />
+        <PackageReference Include="Aspire.Hosting.Docker" Version="13.6.1" />
+        <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.6.1" />
+        <PackageReference Include="Aspire.Hosting.Redis" Version="13.6.1" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\FavoriteBusApp.Api\FavoriteBusApp.Api.csproj" />

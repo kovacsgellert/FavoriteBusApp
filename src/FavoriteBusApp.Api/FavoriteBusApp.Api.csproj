@@ -3,9 +3,9 @@
         <UserSecretsId>11cd6599-7965-42f8-bc77-531bf4514ffe</UserSecretsId>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Aspire.StackExchange.Redis" Version="13.0.2" />
-        <PackageReference Include="MediatR" Version="13.0.0" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
+        <PackageReference Include="Aspire.StackExchange.Redis" Version="13.6.1" />
+        <PackageReference Include="MediatR" Version="13.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\FavoriteBusApp.ServiceDefaults\FavoriteBusApp.ServiceDefaults.csproj" />

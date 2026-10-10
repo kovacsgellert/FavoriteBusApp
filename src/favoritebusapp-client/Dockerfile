@@ -2,12 +2,11 @@ FROM node:current-alpine AS build
 
 WORKDIR /app
 
-COPY src/favoritebusapp-client/package.json package.json
-COPY src/favoritebusapp-client/package-lock.json package-lock.json
+COPY package.json package-lock.json ./
 
 RUN npm install
 
-COPY src/favoritebusapp-client .
+COPY . .
 
 RUN npm run build --loglevel=error
 

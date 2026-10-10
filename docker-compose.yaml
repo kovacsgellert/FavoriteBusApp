@@ -1,8 +1,6 @@
 services:
   api:
-    build:
-      context: .
-      dockerfile: src/FavoriteBusApp.Api/Dockerfile
+    image: "ghcr.io/kovacsgellert/favoritebusapp/api:0.2.3"
     ports:
       - target: 8080
         published: 5000
@@ -21,8 +19,8 @@ services:
 
   client:
     build:
-      context: .
-      dockerfile: src/favoritebusapp-client/Dockerfile
+      context: src/favoritebusapp-client
+      dockerfile: Dockerfile
     ports:
       - target: 3000
         published: 3000

@@ -1,7 +1,7 @@
 services:
   api:
     container_name: "favoritebusapp-api"
-    image: "ghcr.io/kovacsgellert/favoritebusapp/favoritebusapp-api:latest"
+    image: "ghcr.io/kovacsgellert/favoritebusapp/api:0.2.3"
     ports:
       - target: 8080
         published: 5000
@@ -27,7 +27,7 @@ services:
 
   client:
     container_name: "favoritebusapp-client"
-    image: "ghcr.io/kovacsgellert/favoritebusapp/favoritebusapp-client:latest"
+    image: "ghcr.io/kovacsgellert/favoritebusapp/client:0.2.3"
     ports:
       - target: 3000
         published: 3000

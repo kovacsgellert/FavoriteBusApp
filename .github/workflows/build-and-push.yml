@@ -1,0 +1,40 @@
+name: Build and Push Images
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Install Aspire CLI
+        run: |
+          curl -sSL https://aspire.dev/install.sh | bash
+          echo "$HOME/.aspire/bin" >> $GITHUB_PATH
+
+      - name: Output Aspire CLI version
+        run: aspire --version
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push images
+        env:
+          REGISTRY_ENDPOINT: ghcr.io
+          REGISTRY_REPOSITORY: ${{ github.repository }}
+        run: aspire do push
